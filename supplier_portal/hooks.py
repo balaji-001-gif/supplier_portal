@@ -13,13 +13,8 @@ app_license = "MIT"
 
 # ---------------------------------------------
 # Includes in <head>
+# Portals use inline styles in templates - no external assets needed.
 # ---------------------------------------------
-app_include_css = "/assets/supplier_portal/css/supplier_portal.css"
-app_include_js = "/assets/supplier_portal/js/supplier_portal.js"
-
-# Web page includes
-web_include_css = "/assets/supplier_portal/css/supplier_portal.css"
-web_include_js = "/assets/supplier_portal/js/qr_scanner.js"
 
 # ---------------------------------------------
 # Website route rules
