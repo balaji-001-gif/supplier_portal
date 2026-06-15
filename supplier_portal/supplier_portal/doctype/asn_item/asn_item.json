@@ -1,0 +1,163 @@
+{
+ "actions": [],
+ "creation": "2025-06-15 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "po_detail",
+  "column_break_4",
+  "po_qty",
+  "uom",
+  "qty_section",
+  "dispatch_qty",
+  "received_qty",
+  "accepted_qty",
+  "rejected_qty",
+  "column_break_11",
+  "short_qty",
+  "excess_qty",
+  "batch_section",
+  "batch_no",
+  "manufacturing_date",
+  "column_break_16",
+  "expiry_date",
+  "serial_nos"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "po_detail",
+   "fieldtype": "Link",
+   "label": "PO Detail",
+   "options": "Purchase Order Item"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "po_qty",
+   "fieldtype": "Float",
+   "label": "PO Qty",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "dispatch_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dispatch Qty",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "accepted_qty",
+   "fieldtype": "Float",
+   "label": "Accepted Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "rejected_qty",
+   "fieldtype": "Float",
+   "label": "Rejected Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "short_qty",
+   "fieldtype": "Float",
+   "label": "Short Qty",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "excess_qty",
+   "fieldtype": "Float",
+   "label": "Excess Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "batch_section",
+   "fieldtype": "Section Break",
+   "label": "Batch / Serial Details"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Batch No.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "manufacturing_date",
+   "fieldtype": "Date",
+   "label": "Manufacturing Date"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "serial_nos",
+   "fieldtype": "Text",
+   "label": "Serial Numbers"
+  }
+ ],
+ "istable": 1,
+ "modified": "2025-06-15 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "ASN Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

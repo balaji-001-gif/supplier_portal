@@ -1,0 +1,107 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Scorecard - Supplier Portal{% endblock %}
+
+{% block style %}
+<style>
+    .portal-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0; }
+    .page-header p { font-size: 13px; color: #64748b; }
+    .scorecard-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+    .scorecard-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+    .scorecard-period { font-size: 14px; font-weight: 600; color: #1e293b; }
+    .scorecard-rating { padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .rating-A,.rating-A\+\-\\ Excellent { background: #dcfce7; color: #16a34a; }
+    .rating-A\+\-\\ Very\ Good { background: #dbeafe; color: #2563eb; }
+    .rating-B\+\-\\ Good { background: #fef3c7; color: #d97706; }
+    .rating-C\+\-\\ Average { background: #fed7aa; color: #c2410c; }
+    .rating-D\+\-\\ Needs\ Improvement { background: #fee2e2; color: #dc2626; }
+    .scorecard-body { padding: 16px 20px; }
+    .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { font-size: 13px; color: #475569; }
+    .metric-value { font-size: 16px; font-weight: 700; color: #1e293b; }
+    .metric-bar { flex: 1; margin: 0 16px; }
+    .bar-track { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; }
+    .overall-score { text-align: center; padding: 24px; }
+    .overall-score .score { font-size: 48px; font-weight: 800; }
+    .overall-score .label { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .empty-state { text-align: center; padding: 64px; color: #94a3b8; background: white; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="page-header">
+        <h1>My Scorecard</h1>
+        <p>Performance metrics and ratings</p>
+    </div>
+
+    {% if scorecards %}
+        {% for sc in scorecards %}
+        <div class="scorecard-card">
+            <div class="scorecard-header">
+                <span class="scorecard-period">{{ sc.fiscal_year_start }} - {{ sc.fiscal_year_start[:4]|int + 1 }}</span>
+                <span class="scorecard-rating rating-{{ sc.rating.replace(' ', '')[:10] }}">{{ sc.rating }}</span>
+            </div>
+            <div class="scorecard-body">
+                <div class="overall-score">
+                    <div class="score" style="color: {% if sc.overall_score >= 80 %}#16a34a{% elif sc.overall_score >= 60 %}#d97706{% else %}#dc2626{% endif %}">
+                        {{ "%.1f"|format(sc.overall_score) }}%
+                    </div>
+                    <div class="label">Overall Score</div>
+                </div>
+
+                <div class="metric-row">
+                    <span class="metric-label">📅 On-Time Delivery</span>
+                    <div class="metric-bar">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: {{ sc.on_time_delivery_rate }}%; background: #2563eb;"></div>
+                        </div>
+                    </div>
+                    <span class="metric-value" style="color: #2563eb;">{{ "%.1f"|format(sc.on_time_delivery_rate) }}%</span>
+                </div>
+
+                <div class="metric-row">
+                    <span class="metric-label">✅ Quality Acceptance</span>
+                    <div class="metric-bar">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: {{ sc.quality_acceptance_rate }}%; background: #16a34a;"></div>
+                        </div>
+                    </div>
+                    <span class="metric-value" style="color: #16a34a;">{{ "%.1f"|format(sc.quality_acceptance_rate) }}%</span>
+                </div>
+
+                <div class="metric-row">
+                    <span class="metric-label">📋 Documentation Compliance</span>
+                    <div class="metric-bar">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: {{ sc.documentation_compliance_rate }}%; background: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                    <span class="metric-value" style="color: #8b5cf6;">{{ "%.1f"|format(sc.documentation_compliance_rate) }}%</span>
+                </div>
+
+                <div class="metric-row">
+                    <span class="metric-label">📊 Invoice Accuracy</span>
+                    <div class="metric-bar">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: {{ sc.invoice_accuracy_rate }}%; background: #f59e0b;"></div>
+                        </div>
+                    </div>
+                    <span class="metric-value" style="color: #f59e0b;">{{ "%.1f"|format(sc.invoice_accuracy_rate) }}%</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">📊</div>
+        <p>No scorecards available yet. Scorecards are generated periodically.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

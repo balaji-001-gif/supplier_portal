@@ -1,0 +1,163 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Supplier Portal Dashboard{% endblock %}
+
+{% block style %}
+<style>
+    .portal-container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .portal-header { margin-bottom: 24px; }
+    .portal-header h1 { font-size: 24px; font-weight: 700; color: #1e293b; }
+    .portal-header p { color: #64748b; font-size: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+    .stat-card .stat-value { font-size: 28px; font-weight: 700; color: #2563eb; }
+    .stat-card .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .stat-card .stat-icon { font-size: 24px; margin-bottom: 8px; }
+    .section-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .section-card h3 { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 12px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; }
+    .table td { padding: 10px 12px; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .status-Draft { background: #f1f5f9; color: #64748b; }
+    .status-Submitted { background: #dbeafe; color: #2563eb; }
+    .status-Received { background: #dcfce7; color: #16a34a; }
+    .status-Open { background: #fef3c7; color: #d97706; }
+    .portal-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .portal-link { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; text-decoration: none; transition: all 0.2s; }
+    .portal-link:hover { border-color: #2563eb; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1); }
+    .portal-link .link-icon { font-size: 24px; }
+    .portal-link .link-label { font-size: 12px; font-weight: 500; color: #1e293b; }
+    @media (max-width: 640px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="portal-header">
+        <h1>Welcome, {{ supplier.supplier_name }}</h1>
+        <p>Supplier Portal Dashboard</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="portal-links">
+        <a href="/supplier_portal/asn/new" class="portal-link">
+            <span class="link-icon">📦</span>
+            <span class="link-label">Create ASN</span>
+        </a>
+        <a href="/supplier_portal/asn" class="portal-link">
+            <span class="link-icon">📋</span>
+            <span class="link-label">My ASNs</span>
+        </a>
+        <a href="/supplier_portal/purchase_orders" class="portal-link">
+            <span class="link-icon">📄</span>
+            <span class="link-label">Purchase Orders</span>
+        </a>
+        <a href="/supplier_portal/invoices" class="portal-link">
+            <span class="link-icon">🧾</span>
+            <span class="link-label">Invoices</span>
+        </a>
+        <a href="/supplier_portal/scorecard" class="portal-link">
+            <span class="link-icon">📊</span>
+            <span class="link-label">Scorecard</span>
+        </a>
+        <a href="/supplier_portal/queries" class="portal-link">
+            <span class="link-icon">💬</span>
+            <span class="link-label">Queries{% if open_queries > 0 %} ({{ open_queries }}){% endif %}</span>
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-value">{{ stats.open_pos }}</div>
+            <div class="stat-label">Open Purchase Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value">{{ stats.pending_asns }}</div>
+            <div class="stat-label">Pending ASNs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🧾</div>
+            <div class="stat-value">{{ stats.pending_invoices }}</div>
+            <div class="stat-label">Pending Invoices</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-value">{{ stats.this_month_deliveries }}</div>
+            <div class="stat-label">This Month Deliveries</div>
+        </div>
+        {% if latest_scorecard %}
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value">{{ latest_scorecard[0].overall_score }}%</div>
+            <div class="stat-label">Score: {{ latest_scorecard[0].rating }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent ASNs -->
+    <div class="section-card">
+        <h3>Recent Advance Shipment Notices</h3>
+        {% if recent_asns %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ASN No.</th>
+                    <th>Date</th>
+                    <th>PO No.</th>
+                    <th>Expected Delivery</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asn in recent_asns %}
+                <tr>
+                    <td><a href="/supplier_portal/asn/{{ asn.name }}">{{ asn.name }}</a></td>
+                    <td>{{ asn.asn_date }}</td>
+                    <td>{{ asn.purchase_order }}</td>
+                    <td>{{ asn.expected_delivery_date }}</td>
+                    <td><span class="status-badge status-{{ asn.status }}">{{ asn.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #94a3b8; font-size: 13px;">No ASNs found. <a href="/supplier_portal/asn/new">Create your first ASN</a></p>
+        {% endif %}
+    </div>
+
+    <!-- Recent POs -->
+    <div class="section-card">
+        <h3>Recent Purchase Orders</h3>
+        {% if recent_pos %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>PO No.</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for po in recent_pos %}
+                <tr>
+                    <td>{{ po.name }}</td>
+                    <td>{{ po.transaction_date }}</td>
+                    <td>{{ po.currency }} {{ po.grand_total }}</td>
+                    <td><span class="status-badge status-{{ po.status }}">{{ po.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #94a3b8; font-size: 13px;">No Purchase Orders found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

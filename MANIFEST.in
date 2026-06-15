@@ -1,0 +1,11 @@
+recursive-include supplier_portal *.py
+recursive-include supplier_portal *.js
+recursive-include supplier_portal *.json
+recursive-include supplier_portal *.css
+recursive-include supplier_portal *.html
+recursive-include supplier_portal *.md
+recursive-include supplier_portal *.txt
+include requirements.txt
+include setup.py
+include README.md
+include license.txt

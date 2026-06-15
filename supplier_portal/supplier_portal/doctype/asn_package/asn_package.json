@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "creation": "2025-06-15 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "package_id",
+  "package_type",
+  "column_break_3",
+  "gross_weight",
+  "net_weight",
+  "dimensions_section",
+  "length",
+  "width",
+  "column_break_9",
+  "height",
+  "volume",
+  "qr_section",
+  "qr_code",
+  "qr_generated",
+  "column_break_14",
+  "scanned_at_gate",
+  "scan_timestamp",
+  "status_section",
+  "package_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "package_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Package ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "package_type",
+   "fieldtype": "Select",
+   "label": "Package Type",
+   "options": "\nCarton\nPallet\nCrate\nBundle\nOther"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gross_weight",
+   "fieldtype": "Float",
+   "label": "Gross Weight (kg)"
+  },
+  {
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "label": "Net Weight (kg)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Dimensions"
+  },
+  {
+   "fieldname": "length",
+   "fieldtype": "Float",
+   "label": "Length (cm)"
+  },
+  {
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width (cm)"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height (cm)"
+  },
+  {
+   "fieldname": "volume",
+   "fieldtype": "Float",
+   "label": "Volume (m\u00b3)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_section",
+   "fieldtype": "Section Break",
+   "label": "QR Code"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Text",
+   "label": "QR Code Data",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "qr_generated",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "QR Generated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "scanned_at_gate",
+   "fieldtype": "Check",
+   "label": "Scanned at Gate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Scan Timestamp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Ready",
+   "fieldname": "package_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Package Status",
+   "options": "Ready\nIn Transit\nAt Gate\nUnloading\nReceived\nDamaged"
+  }
+ ],
+ "istable": 1,
+ "modified": "2025-06-15 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "ASN Package",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

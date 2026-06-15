@@ -1,0 +1,194 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Queries - Supplier Portal{% endblock %}
+
+{% block style %}
+<style>
+    .portal-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { background: white; color: #64748b; border: 1px solid #e2e8f0; }
+    .btn-outline:hover { background: #f8fafc; }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer; text-decoration: none; }
+    .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+    .query-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .query-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .query-subject { font-weight: 600; font-size: 14px; color: #1e293b; }
+    .query-meta { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .query-category { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+    .query-priority { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+    .priority-Low { background: #e0f2fe; color: #0284c7; }
+    .priority-Medium { background: #fef3c7; color: #d97706; }
+    .priority-High { background: #fee2e2; color: #dc2626; }
+    .priority-Urgent { background: #fce7f3; color: #db2777; }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .status-Open { background: #fef3c7; color: #d97706; }
+    .status-Responded { background: #dbeafe; color: #2563eb; }
+    .status-Closed { background: #f1f5f9; color: #64748b; }
+    .response-box { margin-top: 12px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #334155; }
+    .response-box .label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+    .query-date { font-size: 11px; color: #94a3b8; }
+    .empty-state { text-align: center; padding: 48px; color: #94a3b8; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 16px; width: 90%; max-width: 500px; padding: 24px; }
+    .modal h2 { font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 16px 0; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .form-group label { font-size: 12px; font-weight: 500; color: #475569; }
+    .form-control { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; }
+    .form-control:focus { border-color: #2563eb; }
+    select.form-control { background: white; }
+    .button-group { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="page-header">
+        <h1>Queries & Communication</h1>
+        <button class="btn btn-primary" onclick="document.getElementById('queryModal').classList.add('active')">
+            + Raise New Query
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+        <a href="/supplier_portal/queries" class="filter-btn {% if not frappe.form_dict.status %}active{% endif %}">All</a>
+        {% for s in statuses %}
+        <a href="/supplier_portal/queries?status={{ s }}" class="filter-btn {% if frappe.form_dict.status == s %}active{% endif %}">{{ s }}</a>
+        {% endfor %}
+    </div>
+
+    {% if queries %}
+        {% for q in queries %}
+        <div class="query-card">
+            <div class="query-header">
+                <div>
+                    <div class="query-subject">{{ q.subject }}</div>
+                    <div class="query-date">{{ q.submitted_on }}</div>
+                </div>
+                <div>
+                    <span class="status-badge status-{{ q.status }}">{{ q.status }}</span>
+                </div>
+            </div>
+            <div class="query-meta">
+                <span class="query-category">{{ q.query_category }}</span>
+                <span class="query-priority priority-{{ q.priority }}">{{ q.priority }}</span>
+            </div>
+            {% if q.response %}
+            <div class="response-box">
+                <div class="label">Response {% if q.responded_on %}({{ q.responded_on }}){% endif %}</div>
+                {{ q.response }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">💬</div>
+        <p>No queries found</p>
+    </div>
+    {% endif %}
+
+    <!-- New Query Modal -->
+    <div class="modal-overlay" id="queryModal">
+        <div class="modal">
+            <h2>Raise New Query</h2>
+            <form id="queryForm">
+                <div class="form-group">
+                    <label>Subject <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="q_subject" placeholder="Brief subject" required>
+                </div>
+                <div class="form-group">
+                    <label>Category <span class="required">*</span></label>
+                    <select class="form-control" id="q_category" required>
+                        <option value="">Select category</option>
+                        <option value="Invoice / Payment">Invoice / Payment</option>
+                        <option value="PO / Contract">PO / Contract</option>
+                        <option value="Quality / Rejection">Quality / Rejection</option>
+                        <option value="Delivery / Logistics">Delivery / Logistics</option>
+                        <option value="Documentation">Documentation</option>
+                        <option value="Portal Access">Portal Access</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select class="form-control" id="q_priority">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reference Document</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <select class="form-control" id="q_ref_type">
+                            <option value="">Doc Type</option>
+                            <option value="Purchase Order">Purchase Order</option>
+                            <option value="Advance Shipment Notice">ASN</option>
+                            <option value="Purchase Receipt">Purchase Receipt</option>
+                            <option value="Supplier Invoice Submission">Invoice</option>
+                        </select>
+                        <input type="text" class="form-control" id="q_ref_name" placeholder="Document No.">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Message <span class="required">*</span></label>
+                    <textarea class="form-control" id="q_message" rows="4" placeholder="Describe your query in detail..." required></textarea>
+                </div>
+            </form>
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="document.getElementById('queryModal').classList.remove('active')">Cancel</button>
+                <button class="btn btn-primary" id="submitQueryBtn">Submit Query</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('submitQueryBtn').addEventListener('click', function() {
+        const data = {
+            subject: document.getElementById('q_subject').value,
+            query_category: document.getElementById('q_category').value,
+            priority: document.getElementById('q_priority').value,
+            query_message: document.getElementById('q_message').value,
+            reference_doctype: document.getElementById('q_ref_type').value || null,
+            reference_docname: document.getElementById('q_ref_name').value || null
+        };
+
+        if (!data.subject || !data.query_category || !data.query_message) {
+            frappe.msgprint(__('Please fill Subject, Category, and Message'));
+            return;
+        }
+
+        this.disabled = true;
+        this.textContent = 'Submitting...';
+
+        frappe.call({
+            method: 'frappe.client.insert',
+            args: {
+                doc: {
+                    doctype: 'Supplier Query',
+                    ...data
+                }
+            },
+            callback: function(r) {
+                if (r.message) {
+                    frappe.msgprint(__('Query submitted successfully'));
+                    document.getElementById('queryModal').classList.remove('active');
+                    location.reload();
+                } else {
+                    frappe.msgprint(__('Error submitting query'));
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

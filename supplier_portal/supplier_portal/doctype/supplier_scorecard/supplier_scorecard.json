@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "autoname": "format:SC-{supplier}-{fiscal_year_start}",
+ "creation": "2025-06-15 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier",
+  "supplier_name",
+  "fiscal_year_start",
+  "fiscal_year_end",
+  "column_break_5",
+  "overall_score",
+  "rating",
+  "metrics_section",
+  "on_time_delivery_rate",
+  "quality_acceptance_rate",
+  "column_break_10",
+  "documentation_compliance_rate",
+  "invoice_accuracy_rate",
+  "calculation_notes_section",
+  "calculation_notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "fiscal_year_start",
+   "fieldtype": "Date",
+   "label": "Fiscal Year Start",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year_end",
+   "fieldtype": "Date",
+   "label": "Fiscal Year End"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overall_score",
+   "fieldtype": "Percent",
+   "label": "Overall Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rating",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "metrics_section",
+   "fieldtype": "Section Break",
+   "label": "Performance Metrics"
+  },
+  {
+   "fieldname": "on_time_delivery_rate",
+   "fieldtype": "Percent",
+   "label": "On-Time Delivery Rate",
+   "read_only": 1,
+   "description": "% of deliveries made on or before schedule date"
+  },
+  {
+   "fieldname": "quality_acceptance_rate",
+   "fieldtype": "Percent",
+   "label": "Quality Acceptance Rate",
+   "read_only": 1,
+   "description": "% of accepted qty vs total received"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "documentation_compliance_rate",
+   "fieldtype": "Percent",
+   "label": "Documentation Compliance Rate",
+   "read_only": 1,
+   "description": "% of ASNs with all documents attached"
+  },
+  {
+   "fieldname": "invoice_accuracy_rate",
+   "fieldtype": "Percent",
+   "label": "Invoice Accuracy Rate",
+   "read_only": 1,
+   "description": "% of invoices approved without rejection"
+  },
+  {
+   "fieldname": "calculation_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Calculation Notes"
+  },
+  {
+   "fieldname": "calculation_notes",
+   "fieldtype": "Text Editor",
+   "label": "Calculation Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Supplier Scorecard",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-15 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "Supplier Scorecard",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Supplier Portal User",
+   "share": 0,
+   "write": 0
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

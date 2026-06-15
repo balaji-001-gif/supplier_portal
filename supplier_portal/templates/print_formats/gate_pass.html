@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 11px;
+            color: #1e293b;
+        }
+        .gate-pass {
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .header h1 { font-size: 18px; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .header .gate-no { font-size: 24px; font-weight: 800; color: #2563eb; margin: 4px 0; }
+        .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted #e2e8f0; }
+        .row:last-child { border-bottom: none; }
+        .label { color: #64748b; font-size: 10px; }
+        .value { font-weight: 600; font-size: 11px; }
+        .footer { text-align: center; margin-top: 12px; padding-top: 8px; border-top: 2px dashed #e2e8f0; font-size: 9px; color: #94a3b8; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 8px; }
+        .signature-line { width: 120px; border-top: 1px solid #1e293b; padding-top: 4px; font-size: 9px; text-align: center; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="gate-pass">
+        <div class="header">
+            <h1>GATE PASS</h1>
+            <div class="gate-no">{{ doc.name }}</div>
+            <div style="font-size: 9px; color: #64748b;">{{ doc.entry_date }} {{ doc.entry_time }}</div>
+        </div>
+
+        <div class="row"><span class="label">Supplier</span><span class="value">{{ doc.supplier_name }}</span></div>
+        {% if doc.asn_reference %}<div class="row"><span class="label">ASN No.</span><span class="value">{{ doc.asn_reference }}</span></div>{% endif %}
+        <div class="row"><span class="label">Vehicle No.</span><span class="value">{{ doc.vehicle_no }}</span></div>
+        <div class="row"><span class="label">Driver</span><span class="value">{{ doc.driver_name or '-' }}</span></div>
+        <div class="row"><span class="label">Driver Mobile</span><span class="value">{{ doc.driver_mobile or '-' }}</span></div>
+        <div class="row"><span class="label">Transport</span><span class="value">{{ doc.transport_company or '-' }}</span></div>
+        <div class="row"><span class="label">LR No.</span><span class="value">{{ doc.lr_no or '-' }}</span></div>
+        <div class="row"><span class="label">Packages</span><span class="value">{{ doc.num_packages or '-' }}</span></div>
+        <div class="row"><span class="label">Status</span><span class="value">{{ doc.status }}</span></div>
+        {% if doc.delivery_challan_verified %}<div class="row"><span class="label">Delivery Challan</span><span class="value">Verified ✅</span></div>{% endif %}
+        {% if doc.eway_bill_verified %}<div class="row"><span class="label">E-Way Bill</span><span class="value">Verified ✅</span></div>{% endif %}
+
+        <div class="signatures">
+            <div class="signature-line">Driver Signature</div>
+            <div class="signature-line">Gate Guard Signature</div>
+        </div>
+
+        <div class="footer">
+            This is a computer-generated gate pass.<br>
+            Generated on: {{ frappe.utils.now_datetime() }}
+        </div>
+    </div>
+</body>
+</html>

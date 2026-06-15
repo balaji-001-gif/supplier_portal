@@ -1,0 +1,323 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2025-06-15 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "asn_reference",
+  "supplier",
+  "supplier_name",
+  "column_break_5",
+  "entry_date",
+  "entry_time",
+  "status",
+  "vehicle_section",
+  "vehicle_no",
+  "driver_name",
+  "driver_mobile",
+  "column_break_12",
+  "transport_company",
+  "lr_no",
+  "num_packages",
+  "scan_section",
+  "scanned_package_id",
+  "scan_timestamp",
+  "column_break_18",
+  "gate_guard",
+  "unloading_section",
+  "unloading_bay",
+  "unloading_start_time",
+  "column_break_22",
+  "unloading_end_time",
+  "unloading_duration",
+  "documents_section",
+  "delivery_challan_verified",
+  "eway_bill_verified",
+  "column_break_27",
+  "physical_inspection_done",
+  "remarks",
+  "purchase_receipt_section",
+  "purchase_receipt",
+  "pr_status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "GE-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "asn_reference",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "ASN Reference",
+   "options": "Advance Shipment Notice"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "entry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Entry Date",
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "entry_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Entry Time",
+   "reqd": 1
+  },
+  {
+   "default": "At Gate",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "At Gate\nDocument Verification\nWaiting for Unloading\nUnloading\nCompleted\nRejected"
+  },
+  {
+   "fieldname": "vehicle_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "fieldname": "driver_mobile",
+   "fieldtype": "Data",
+   "label": "Driver Mobile"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transport_company",
+   "fieldtype": "Data",
+   "label": "Transport Company"
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "label": "LR No."
+  },
+  {
+   "fieldname": "num_packages",
+   "fieldtype": "Int",
+   "label": "Number of Packages"
+  },
+  {
+   "fieldname": "scan_section",
+   "fieldtype": "Section Break",
+   "label": "QR Scan Details"
+  },
+  {
+   "fieldname": "scanned_package_id",
+   "fieldtype": "Data",
+   "label": "Scanned Package ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_timestamp",
+   "fieldtype": "Datetime",
+   "label": "Scan Timestamp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gate_guard",
+   "fieldtype": "Link",
+   "label": "Gate Guard",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unloading_section",
+   "fieldtype": "Section Break",
+   "label": "Unloading Details"
+  },
+  {
+   "fieldname": "unloading_bay",
+   "fieldtype": "Link",
+   "label": "Unloading Bay",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "unloading_start_time",
+   "fieldtype": "Datetime",
+   "label": "Unloading Start Time"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unloading_end_time",
+   "fieldtype": "Datetime",
+   "label": "Unloading End Time"
+  },
+  {
+   "fieldname": "unloading_duration",
+   "fieldtype": "Duration",
+   "label": "Unloading Duration (mins)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Document Verification"
+  },
+  {
+   "default": "0",
+   "fieldname": "delivery_challan_verified",
+   "fieldtype": "Check",
+   "label": "Delivery Challan Verified"
+  },
+  {
+   "default": "0",
+   "fieldname": "eway_bill_verified",
+   "fieldtype": "Check",
+   "label": "E-Way Bill Verified"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "physical_inspection_done",
+   "fieldtype": "Check",
+   "label": "Physical Inspection Done"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "purchase_receipt_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Receipt"
+  },
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt",
+   "options": "Purchase Receipt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pr_status",
+   "fieldtype": "Data",
+   "label": "PR Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Gate Entry",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-15 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "Gate Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Warehouse Staff",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

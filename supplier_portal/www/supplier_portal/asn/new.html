@@ -1,0 +1,337 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Create ASN - Supplier Portal{% endblock %}
+
+{% block style %}
+<style>
+    .portal-container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+    .page-header { margin-bottom: 20px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0; }
+    .page-header p { font-size: 13px; color: #64748b; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .card h3 { font-size: 14px; font-weight: 600; color: #1e293b; margin: 0 0 12px 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; font-weight: 500; color: #475569; }
+    .form-group label .required { color: #dc2626; }
+    .form-control { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+    select.form-control { background: white; }
+    textarea.form-control { min-height: 60px; resize: vertical; }
+    .item-row { padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; }
+    .item-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .item-name { font-weight: 600; font-size: 13px; color: #1e293b; }
+    .item-code { font-size: 11px; color: #94a3b8; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; text-decoration: none; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-outline { background: white; color: #64748b; border: 1px solid #e2e8f0; }
+    .btn-outline:hover { background: #f8fafc; }
+    .button-group { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+    .info-callout { display: flex; gap: 12px; padding: 12px 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; font-size: 12px; color: #1e40af; margin-top: 16px; }
+    .info-callout strong { font-weight: 600; }
+    @media (max-width: 640px) {
+        .form-row { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="portal-container">
+    <div class="page-header">
+        <h1>Create Advance Shipment Notice</h1>
+        <p>Submit shipment details against your purchase orders</p>
+    </div>
+
+    <form id="asnForm">
+        <!-- Shipment Header -->
+        <div class="card">
+            <h3>Shipment Details</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Purchase Order <span class="required">*</span></label>
+                    <select class="form-control" id="po" name="purchase_order" required>
+                        <option value="">Select Purchase Order</option>
+                        {% for po in purchase_orders %}
+                        <option value="{{ po.name }}">{{ po.name }} - {{ po.currency }} {{ po.grand_total }} (Due: {{ po.schedule_date }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ASN Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="asn_date" name="asn_date" value="{{ frappe.utils.nowdate() }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Expected Delivery Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="expected_delivery_date" name="expected_delivery_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Expected Arrival Time</label>
+                    <input type="time" class="form-control" id="expected_arrival_time" name="expected_arrival_time">
+                </div>
+                <div class="form-group">
+                    <label>Delivery Challan No. <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="challan_no" name="delivery_challan_no" placeholder="DC/2025/..." required>
+                </div>
+                <div class="form-group">
+                    <label>Challan Date <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="challan_date" name="challan_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Number of Packages <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="num_packages" name="num_packages" placeholder="1" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>E-Way Bill No.</label>
+                    <input type="text" class="form-control" id="eway_bill" name="eway_bill_no" placeholder="EWAYBILL...">
+                </div>
+                <div class="form-group">
+                    <label>LR / Way Bill No.</label>
+                    <input type="text" class="form-control" id="lr_no" name="lr_no" placeholder="LR/WB no.">
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle & Driver -->
+        <div class="card">
+            <h3>Vehicle & Driver Details</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Vehicle Number <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="vehicle_no" name="vehicle_no" placeholder="MH12AB1234" required>
+                </div>
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" class="form-control" id="driver_name" name="driver_name" placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label>Driver Mobile</label>
+                    <input type="tel" class="form-control" id="driver_mobile" name="driver_mobile" placeholder="+91 XXXXX XXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Transport Company</label>
+                    <input type="text" class="form-control" id="transport_company" name="transport_company" placeholder="Transport company">
+                </div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="card" id="itemsContainer">
+            <h3>Items</h3>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: -8px; margin-bottom: 12px;">Select a Purchase Order above to load items</p>
+            <div id="itemsList"></div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card">
+            <h3>Documents</h3>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Delivery Challan (PDF)</label>
+                    <input type="file" class="form-control" id="challan_attachment" name="delivery_challan_attachment" accept=".pdf">
+                </div>
+                <div class="form-group">
+                    <label>Test Certificate / COA</label>
+                    <input type="file" class="form-control" id="test_certificate" name="test_certificate" accept=".pdf,.jpg,.png">
+                </div>
+                <div class="form-group">
+                    <label>Packing List</label>
+                    <input type="file" class="form-control" id="packing_list" name="packing_list" accept=".pdf">
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        <div class="card">
+            <h3>Additional Information</h3>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>Remarks / Special Instructions</label>
+                    <textarea class="form-control" id="remarks" name="remarks" placeholder="Any special instructions for handling or delivery..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Info Callout -->
+        <div class="info-callout">
+            <span style="font-size: 20px;">⬡</span>
+            <div>
+                <strong>QR Codes Generated on Submission</strong><br>
+                One QR code per package — print and affix before dispatch. Gate guard scans on arrival — no manual entry at gate.
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="button-group">
+            <button type="button" class="btn btn-outline" onclick="window.location.href='/supplier_portal/asn'">Cancel</button>
+            <button type="button" class="btn btn-outline" id="saveDraftBtn">Save Draft</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">Submit ASN & Generate QR Codes</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let loadedItems = [];
+
+    // Load items when PO is selected
+    document.getElementById('po').addEventListener('change', function() {
+        const po = this.value;
+        const itemsContainer = document.getElementById('itemsList');
+        if (!po) {
+            itemsContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px;">Select a Purchase Order to load items</p>';
+            loadedItems = [];
+            return;
+        }
+
+        // Call server to get PO items
+        frappe.call({
+            method: 'supplier_portal.api.asn.get_asn_items',
+            args: { purchase_order: po },
+            callback: function(r) {
+                if (r.message) {
+                    loadedItems = r.message.map(item => ({
+                        ...item,
+                        dispatch_qty: item.qty - (item.received_qty || 0)
+                    }));
+                    renderItems(loadedItems);
+                }
+            }
+        });
+    });
+
+    function renderItems(items) {
+        const container = document.getElementById('itemsList');
+        container.innerHTML = items.map((item, idx) => `
+            <div class="item-row">
+                <div class="item-header">
+                    <div>
+                        <span class="item-name">${item.item_name}</span>
+                        <span class="item-code">${item.item_code}</span>
+                    </div>
+                    <span style="font-size: 12px; color: #64748b;">PO Qty: ${item.qty} ${item.uom}</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dispatch Qty *</label>
+                        <input type="number" class="form-control dispatch-qty" value="${item.qty - (item.received_qty || 0)}" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Batch No. *</label>
+                        <input type="text" class="form-control batch-no" placeholder="BATCH-...">
+                    </div>
+                    <div class="form-group">
+                        <label>Manufacturing Date</label>
+                        <input type="date" class="form-control mfg-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="date" class="form-control expiry-date">
+                    </div>
+                    <div class="form-group">
+                        <label>UOM</label>
+                        <input type="text" class="form-control" value="${item.uom}" readonly style="background: #f1f5f9;">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <input type="text" class="form-control" value="PO Detail: ${item.name}" readonly style="background: #f1f5f9; font-size: 11px;">
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function collectFormData() {
+        const form = document.getElementById('asnForm');
+        const data = {
+            purchase_order: document.getElementById('po').value,
+            asn_date: document.getElementById('asn_date').value,
+            expected_delivery_date: document.getElementById('expected_delivery_date').value,
+            expected_arrival_time: document.getElementById('expected_arrival_time').value || null,
+            delivery_challan_no: document.getElementById('challan_no').value,
+            challan_date: document.getElementById('challan_date').value,
+            num_packages: parseInt(document.getElementById('num_packages').value) || 1,
+            eway_bill_no: document.getElementById('eway_bill').value,
+            lr_no: document.getElementById('lr_no').value,
+            vehicle_no: document.getElementById('vehicle_no').value,
+            driver_name: document.getElementById('driver_name').value,
+            driver_mobile: document.getElementById('driver_mobile').value,
+            transport_company: document.getElementById('transport_company').value,
+            remarks: document.getElementById('remarks').value,
+            items: []
+        };
+
+        const itemRows = document.querySelectorAll('.item-row');
+        itemRows.forEach((row, idx) => {
+            if (loadedItems[idx]) {
+                data.items.push({
+                    item_code: loadedItems[idx].item_code,
+                    item_name: loadedItems[idx].item_name,
+                    po_detail: loadedItems[idx].name,
+                    po_qty: loadedItems[idx].qty,
+                    uom: loadedItems[idx].uom,
+                    dispatch_qty: parseFloat(row.querySelector('.dispatch-qty').value) || 0,
+                    batch_no: row.querySelector('.batch-no').value,
+                    manufacturing_date: row.querySelector('.mfg-date').value || null,
+                    expiry_date: row.querySelector('.expiry-date').value || null
+                });
+            }
+        });
+
+        return data;
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', function() {
+        const data = collectFormData();
+        if (!data.purchase_order || !data.vehicle_no || data.items.length === 0) {
+            frappe.msgprint(__('Please fill in all required fields including PO, vehicle number, and items.'));
+            return;
+        }
+
+        this.disabled = true;
+        this.textContent = 'Submitting...';
+
+        frappe.call({
+            method: 'supplier_portal.api.asn.create_asn',
+            args: { data: JSON.stringify(data) },
+            callback: function(r) {
+                if (r.message && r.message.success) {
+                    // Now submit the ASN
+                    frappe.call({
+                        method: 'supplier_portal.api.asn.submit_asn',
+                        args: { asn_name: r.message.asn },
+                        callback: function(res) {
+                            if (res.message && res.message.success) {
+                                frappe.msgprint(__('ASN submitted successfully! QR codes generated.'));
+                                window.location.href = '/supplier_portal/asn/' + r.message.asn;
+                            } else {
+                                frappe.msgprint(__('Error: ') + (res.message.message || 'Unknown error'));
+                            }
+                        }
+                    });
+                } else {
+                    frappe.msgprint(__('Error: ') + (r.message.message || 'Unknown error'));
+                }
+            }
+        });
+    });
+
+    document.getElementById('saveDraftBtn').addEventListener('click', function() {
+        const data = collectFormData();
+        frappe.call({
+            method: 'supplier_portal.api.asn.create_asn',
+            args: { data: JSON.stringify(data) },
+            callback: function(r) {
+                if (r.message && r.message.success) {
+                    frappe.msgprint(__('ASN saved as draft: ') + r.message.asn);
+                    window.location.href = '/supplier_portal/asn/' + r.message.asn;
+                } else {
+                    frappe.msgprint(__('Error: ') + (r.message.message || 'Unknown error'));
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

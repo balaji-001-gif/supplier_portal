@@ -1,0 +1,328 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-06-15 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "supplier",
+  "supplier_name",
+  "purchase_order",
+  "column_break_5",
+  "asn_date",
+  "expected_delivery_date",
+  "expected_arrival_time",
+  "status",
+  "section_break_10",
+  "delivery_challan_no",
+  "challan_date",
+  "num_packages",
+  "column_break_14",
+  "eway_bill_no",
+  "lr_no",
+  "vehicle_section",
+  "vehicle_no",
+  "driver_name",
+  "column_break_20",
+  "driver_mobile",
+  "transport_company",
+  "items_section",
+  "items",
+  "packages_section",
+  "packages",
+  "documents_section",
+  "delivery_challan_attachment",
+  "test_certificate",
+  "packing_list",
+  "column_break_30",
+  "other_attachments",
+  "additional_info",
+  "remarks",
+  "column_break_34",
+  "submitted_by",
+  "submitted_on",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ASN-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "asn_date",
+   "fieldtype": "Date",
+   "label": "ASN Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expected Delivery Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_arrival_time",
+   "fieldtype": "Time",
+   "label": "Expected Arrival Time"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted\nIn Transit\nAt Gate\nUnloading\nReceived\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "label": "Shipment Details"
+  },
+  {
+   "fieldname": "delivery_challan_no",
+   "fieldtype": "Data",
+   "label": "Delivery Challan No.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "challan_date",
+   "fieldtype": "Date",
+   "label": "Challan Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "num_packages",
+   "fieldtype": "Int",
+   "label": "Number of Packages",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "eway_bill_no",
+   "fieldtype": "Data",
+   "label": "E-Way Bill No."
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "label": "LR / Way Bill No."
+  },
+  {
+   "fieldname": "vehicle_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle & Driver Details"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver_mobile",
+   "fieldtype": "Data",
+   "label": "Driver Mobile"
+  },
+  {
+   "fieldname": "transport_company",
+   "fieldtype": "Data",
+   "label": "Transport Company"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "ASN Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "packages_section",
+   "fieldtype": "Section Break",
+   "label": "Packages"
+  },
+  {
+   "fieldname": "packages",
+   "fieldtype": "Table",
+   "label": "Packages",
+   "options": "ASN Package"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "delivery_challan_attachment",
+   "fieldtype": "Attach",
+   "label": "Delivery Challan (PDF)"
+  },
+  {
+   "fieldname": "test_certificate",
+   "fieldtype": "Attach",
+   "label": "Test Certificate / COA"
+  },
+  {
+   "fieldname": "packing_list",
+   "fieldtype": "Attach",
+   "label": "Packing List"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_attachments",
+   "fieldtype": "Table MultiSelect",
+   "label": "Other Attachments",
+   "options": "File"
+  },
+  {
+   "fieldname": "additional_info",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks / Special Instructions"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "submitted_by",
+   "fieldtype": "Link",
+   "label": "Submitted By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "submitted_on",
+   "fieldtype": "Datetime",
+   "label": "Submitted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Advance Shipment Notice",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-15 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "Advance Shipment Notice",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Supplier Portal User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

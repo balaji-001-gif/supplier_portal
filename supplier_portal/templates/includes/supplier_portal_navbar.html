@@ -1,0 +1,20 @@
+<nav class="supplier-portal-nav">
+    <div class="nav-inner">
+        <a href="/supplier_portal" class="nav-brand">
+            <span class="brand-icon">📦</span>
+            <span class="brand-text">Supplier Portal</span>
+        </a>
+        <div class="nav-links">
+            <a href="/supplier_portal" class="nav-link">Dashboard</a>
+            <a href="/supplier_portal/purchase_orders" class="nav-link">POs</a>
+            <a href="/supplier_portal/asn" class="nav-link">ASNs</a>
+            <a href="/supplier_portal/invoices" class="nav-link">Invoices</a>
+            <a href="/supplier_portal/scorecard" class="nav-link">Scorecard</a>
+            <a href="/supplier_portal/queries" class="nav-link">Queries</a>
+        </div>
+        <div class="nav-user">
+            <span class="user-name">{{ frappe.session.user }}</span>
+            <a href="/logout" class="nav-logout">Logout</a>
+        </div>
+    </div>
+</nav>
