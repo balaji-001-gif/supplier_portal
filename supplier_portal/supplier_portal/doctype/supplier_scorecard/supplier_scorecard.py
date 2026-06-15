@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today, get_first_day_of_month
+from frappe.utils import flt, today
 
 
 class SupplierScorecard(Document):

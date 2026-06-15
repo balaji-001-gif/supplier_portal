@@ -35,7 +35,7 @@ def get_context(context):
         "this_month_deliveries": frappe.db.count("Purchase Receipt", {
             "supplier": user_supplier,
             "docstatus": 1,
-            "posting_date": [">=", frappe.utils.get_first_day_of_month(frappe.utils.nowdate())]
+            "posting_date": [">=", frappe.utils.nowdate()[:8] + "01"]
         })
     }
 
