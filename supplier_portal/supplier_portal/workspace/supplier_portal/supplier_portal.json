@@ -1,0 +1,234 @@
+{
+  "doctype": "Workspace",
+  "name": "Supplier Portal",
+  "label": "Supplier Portal",
+  "title": "Supplier Portal",
+  "icon": "package",
+  "module": "Supplier Portal",
+  "app": "supplier_portal",
+  "category": "Modules",
+  "public": 1,
+  "is_hidden": 0,
+  "creation": "2025-06-15 10:00:00.000000",
+  "modified": "2025-06-15 10:00:00.000000",
+  "modified_by": "Administrator",
+  "owner": "Administrator",
+  "color": "#2563eb",
+  "roles": [
+    {"role": "Purchase Manager"},
+    {"role": "Purchase User"},
+    {"role": "Warehouse Staff"},
+    {"role": "Stock Manager"},
+    {"role": "Stock User"},
+    {"role": "System Manager"}
+  ],
+  "charts": [],
+  "shortcuts": [
+    {
+      "type": "DocType",
+      "link_to": "Advance Shipment Notice",
+      "label": "Advance Shipment Notice"
+    },
+    {
+      "type": "DocType",
+      "link_to": "Gate Entry",
+      "label": "Gate Entry"
+    },
+    {
+      "type": "DocType",
+      "link_to": "Supplier Invoice Submission",
+      "label": "Supplier Invoice Submission"
+    },
+    {
+      "type": "DocType",
+      "link_to": "Supplier Scorecard",
+      "label": "Supplier Scorecard"
+    }
+  ],
+  "content": "[{\"id\":\"cb-asn\",\"type\":\"card\",\"data\":{\"card_name\":\"ASN Management\",\"col\":12}},{\"id\":\"cb-gate\",\"type\":\"card\",\"data\":{\"card_name\":\"Gate Entry & Receiving\",\"col\":12}},{\"id\":\"cb-invoice\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing & Payments\",\"col\":12}},{\"id\":\"cb-scorecard\",\"type\":\"card\",\"data\":{\"card_name\":\"Scorecard & Queries\",\"col\":12}},{\"id\":\"cb-settings\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters & Settings\",\"col\":12}}]",
+  "links": [
+    {
+      "hidden": 0,
+      "idx": 1,
+      "is_query_report": 0,
+      "label": "ASN Management",
+      "link_count": 0,
+      "onboard": 1,
+      "title": "ASN Management",
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "idx": 2,
+      "is_query_report": 0,
+      "label": "Advance Shipment Notice",
+      "link_to": "Advance Shipment Notice",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 3,
+      "is_query_report": 0,
+      "label": "ASN Item",
+      "link_to": "ASN Item",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 4,
+      "is_query_report": 0,
+      "label": "ASN Package",
+      "link_to": "ASN Package",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 5,
+      "is_query_report": 0,
+      "label": "Gate Entry & Receiving",
+      "link_count": 0,
+      "onboard": 1,
+      "title": "Gate Entry & Receiving",
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "idx": 6,
+      "is_query_report": 0,
+      "label": "Gate Entry",
+      "link_to": "Gate Entry",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 7,
+      "is_query_report": 0,
+      "label": "Purchase Receipt",
+      "link_to": "Purchase Receipt",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 8,
+      "is_query_report": 0,
+      "label": "Purchase Order",
+      "link_to": "Purchase Order",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 9,
+      "is_query_report": 0,
+      "label": "Invoicing & Payments",
+      "link_count": 0,
+      "onboard": 1,
+      "title": "Invoicing & Payments",
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "idx": 10,
+      "is_query_report": 0,
+      "label": "Supplier Invoice Submission",
+      "link_to": "Supplier Invoice Submission",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 11,
+      "is_query_report": 0,
+      "label": "Purchase Invoice",
+      "link_to": "Purchase Invoice",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 12,
+      "is_query_report": 0,
+      "label": "Scorecard & Queries",
+      "link_count": 0,
+      "onboard": 1,
+      "title": "Scorecard & Queries",
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "idx": 13,
+      "is_query_report": 0,
+      "label": "Supplier Scorecard",
+      "link_to": "Supplier Scorecard",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 14,
+      "is_query_report": 0,
+      "label": "Supplier Query",
+      "link_to": "Supplier Query",
+      "link_type": "DocType",
+      "onboard": 1,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 15,
+      "is_query_report": 0,
+      "label": "Masters & Settings",
+      "link_count": 0,
+      "onboard": 0,
+      "title": "Masters & Settings",
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "idx": 16,
+      "is_query_report": 0,
+      "label": "Supplier",
+      "link_to": "Supplier",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 17,
+      "is_query_report": 0,
+      "label": "Item",
+      "link_to": "Item",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "idx": 18,
+      "is_query_report": 0,
+      "label": "Warehouse",
+      "link_to": "Warehouse",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    }
+  ],
+  "number_cards": [],
+  "quick_lists": [],
+  "slideshow": ""
+}

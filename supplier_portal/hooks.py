@@ -105,12 +105,3 @@ website_context = {
     "supplier_portal": True
 }
 
-# ---------------------------------------------
-# Website Context
-# ---------------------------------------------
-website_context = {
-    "navbar_search": False,
-    "footer": False,
-    "supplier_portal": True
-}
-
