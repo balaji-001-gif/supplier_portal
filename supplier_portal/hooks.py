@@ -17,6 +17,16 @@ app_license = "MIT"
 # ---------------------------------------------
 
 # ---------------------------------------------
+# Website route rules
+# ---------------------------------------------
+# Route all /supplier_portal/* paths to the main router page handler
+# Using a single router instead of www subdirectory auto-routing for reliability
+website_route_rules = [
+    {"from_route": "/supplier_portal", "to_route": "supplier_portal"},
+    {"from_route": "/supplier_portal/<path:app_path>", "to_route": "supplier_portal"},
+]
+
+# ---------------------------------------------
 # DocType Class Overrides
 # ---------------------------------------------
 override_doctype_class = {
