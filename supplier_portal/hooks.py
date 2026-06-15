@@ -97,6 +97,11 @@ fixtures = [
 ]
 
 # ---------------------------------------------
+# Session Creation
+# ---------------------------------------------
+on_session_creation = "supplier_portal.utils.redirect_to_supplier_portal"
+
+# ---------------------------------------------
 # Website Context
 # ---------------------------------------------
 website_context = {
