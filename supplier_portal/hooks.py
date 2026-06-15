@@ -19,8 +19,10 @@ app_license = "MIT"
 # ---------------------------------------------
 # Website route rules
 # ---------------------------------------------
-# Routes are handled automatically via the www/supplier_portal/ directory structure
-# No additional route rules needed
+# Explicit route rules for supplier portal web pages
+website_route_rules = [
+    {"from_route": "/supplier_portal/<path:app_path>", "to_route": "supplier_portal"},
+]
 
 # ---------------------------------------------
 # DocType Class Overrides
