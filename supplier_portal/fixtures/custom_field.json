@@ -1,6 +1,7 @@
 [
  {
   "doctype": "Custom Field",
+  "name": "Purchase Receipt-gate_entry_reference",
   "dt": "Purchase Receipt",
   "fieldname": "gate_entry_reference",
   "label": "Gate Entry Reference",
@@ -11,6 +12,7 @@
  },
  {
   "doctype": "Custom Field",
+  "name": "Purchase Receipt-asn_reference",
   "dt": "Purchase Receipt",
   "fieldname": "asn_reference",
   "label": "ASN Reference",
@@ -21,6 +23,7 @@
  },
  {
   "doctype": "Custom Field",
+  "name": "User-supplier",
   "dt": "User",
   "fieldname": "supplier",
   "label": "Supplier",
@@ -30,6 +33,7 @@
  },
  {
   "doctype": "Custom Field",
+  "name": "Supplier-portal_access_enabled",
   "dt": "Supplier",
   "fieldname": "portal_access_enabled",
   "label": "Portal Access Enabled",
@@ -39,6 +43,7 @@
  },
  {
   "doctype": "Custom Field",
+  "name": "Supplier-portal_user",
   "dt": "Supplier",
   "fieldname": "portal_user",
   "label": "Portal User",
