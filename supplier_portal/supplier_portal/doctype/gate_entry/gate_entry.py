@@ -68,9 +68,14 @@ class GateEntry(Document):
             pr.conversion_rate = po.conversion_rate
             pr.plc_conversion_rate = po.plc_conversion_rate
             pr.price_list_currency = po.price_list_currency
-            pr.plc_conversion_rate = po.plc_conversion_rate
             pr.buying_price_list = po.buying_price_list
             pr.set_warehouse = po.set_warehouse
+        else:
+            # Fallback: use defaults
+            pr.company = frappe.defaults.get_user_default("company")
+            pr.currency = frappe.defaults.get_global_default("currency") or "INR"
+            pr.conversion_rate = 1
+            pr.plc_conversion_rate = 1
 
         # Custom fields on PR (added via fixtures)
         pr.db_set("gate_entry_reference", self.name)
