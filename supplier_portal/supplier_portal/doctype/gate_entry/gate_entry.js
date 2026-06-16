@@ -9,9 +9,11 @@ frappe.ui.form.on('Gate Entry', {
             }
         }
 
-        // Generate QR scan link
+        // Open QR Scanner dialog
         if (frm.doc.docstatus === 0) {
             frm.add_custom_button(__('Open QR Scanner'), function() {
+                let scannerStream = null;
+
                 let d = new frappe.ui.Dialog({
                     title: __('Scan QR Code'),
                     fields: [
@@ -20,45 +22,81 @@ frappe.ui.form.on('Gate Entry', {
                             fieldname: 'qr_scanner',
                             options: `
                                 <div style="text-align: center;">
-                                    <video id="qr-video" style="width: 100%; max-width: 400px; border: 2px dashed #ccc; border-radius: 8px;"></video>
-                                    <p class="text-muted" style="margin-top: 8px; font-size: 12px;">
-                                        Point camera at the package QR code
-                                    </p>
-                                    <button class="btn btn-sm btn-primary" onclick="startQRScanner()">
-                                        Start Camera
+                                    <video id="qr-video" style="width: 100%; max-width: 400px; border: 2px dashed #ccc; border-radius: 8px; display: none;"></video>
+                                    <div id="qr-placeholder" style="padding: 40px 20px; color: #94a3b8;">
+                                        <div style="font-size: 48px; margin-bottom: 12px;">📷</div>
+                                        <div>Camera off — click Start to begin scanning</div>
+                                    </div>
+                                    <p id="scanner-status" style="font-size: 12px; margin-top: 8px; min-height: 20px; color: #64748b;"></p>
+                                    <button class="btn btn-sm btn-primary" id="start-scanner-btn">
+                                        📷 Start Camera
                                     </button>
-                                    <button class="btn btn-sm btn-danger" onclick="stopQRScanner()" style="display:none;" id="stop-scanner-btn">
-                                        Stop Camera
+                                    <button class="btn btn-sm btn-danger" id="stop-scanner-btn" style="display:none;">
+                                        ⏹ Stop Camera
                                     </button>
                                 </div>
-                                <script>
-                                    let scannerStream = null;
-                                    function startQRScanner() {
-                                        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                                            .then(function(stream) {
-                                                scannerStream = stream;
-                                                document.getElementById('qr-video').srcObject = stream;
-                                                document.getElementById('stop-scanner-btn').style.display = 'inline-block';
-                                            })
-                                            .catch(function(err) {
-                                                frappe.msgprint(__('Camera access denied. Please use a QR scanner device.'));
-                                            });
-                                    }
-                                    function stopQRScanner() {
-                                        if (scannerStream) {
-                                            scannerStream.getTracks().forEach(t => t.stop());
-                                            scannerStream = null;
-                                        }
-                                        document.getElementById('stop-scanner-btn').style.display = 'none';
-                                    }
-                                </script>
                             `
                         }
                     ],
                     primary_action_label: __('Close'),
-                    primary_action: function() { d.hide(); }
+                    primary_action: function() {
+                        stopScanner();
+                        d.hide();
+                    }
                 });
+
+                function startScanner() {
+                    let video = document.getElementById('qr-video');
+                    let placeholder = document.getElementById('qr-placeholder');
+                    let status = document.getElementById('scanner-status');
+
+                    if (!video) return;
+
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                        .then(function(stream) {
+                            scannerStream = stream;
+                            video.srcObject = stream;
+                            video.play();
+                            video.style.display = 'block';
+                            if (placeholder) placeholder.style.display = 'none';
+                            document.getElementById('start-scanner-btn').style.display = 'none';
+                            document.getElementById('stop-scanner-btn').style.display = 'inline-block';
+                            if (status) {
+                                status.textContent = 'Camera active. Point at QR code.';
+                                status.style.color = '#16a34a';
+                            }
+                        })
+                        .catch(function(err) {
+                            frappe.msgprint(__('Camera access denied. Please use a QR scanner device.'));
+                        });
+                }
+
+                function stopScanner() {
+                    if (scannerStream) {
+                        scannerStream.getTracks().forEach(function(t) { t.stop(); });
+                        scannerStream = null;
+                    }
+                    let video = document.getElementById('qr-video');
+                    let placeholder = document.getElementById('qr-placeholder');
+                    let status = document.getElementById('scanner-status');
+                    if (video) video.style.display = 'none';
+                    if (placeholder) placeholder.style.display = 'block';
+                    document.getElementById('start-scanner-btn').style.display = 'inline-block';
+                    document.getElementById('stop-scanner-btn').style.display = 'none';
+                    if (status) {
+                        status.textContent = 'Camera stopped';
+                        status.style.color = '#64748b';
+                    }
+                }
+
                 d.show();
+
+                // Attach event listeners — DOM elements are available synchronously
+                document.getElementById('start-scanner-btn').addEventListener('click', startScanner);
+                document.getElementById('stop-scanner-btn').addEventListener('click', stopScanner);
+
+                // Clean up camera when dialog is closed by any means (Escape, click-outside, Close button)
+                d.onhide = stopScanner;
             }, __('Actions'));
         }
     },
