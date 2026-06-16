@@ -64,18 +64,21 @@ class GateEntry(Document):
         pr.db_set("asn_reference", self.asn_reference)
 
         for asn_item in asn.items:
-            pr.append("items", {
+            pr_item = pr.append("items", {
                 "item_code": asn_item.item_code,
                 "item_name": asn_item.item_name,
                 "qty": asn_item.dispatch_qty,
                 "uom": asn_item.uom,
                 "purchase_order": asn.purchase_order,
-                "purchase_order_item": asn_item.po_detail,
-                "batch_no": asn_item.batch_no,
-                "manufacturing_date": asn_item.manufacturing_date,
-                "expiry_date": asn_item.expiry_date,
-                "serial_no": asn_item.serial_nos
+                "purchase_order_item": asn_item.po_detail
             })
+            # Only set batch/serial fields if the batch exists in the system
+            if asn_item.batch_no and frappe.db.exists("Batch", asn_item.batch_no):
+                pr_item.batch_no = asn_item.batch_no
+                pr_item.manufacturing_date = asn_item.manufacturing_date
+                pr_item.expiry_date = asn_item.expiry_date
+            if asn_item.serial_nos:
+                pr_item.serial_no = asn_item.serial_nos
         pr.save(ignore_permissions=True)
         self.db_set("purchase_receipt", pr.name)
         self.db_set("pr_status", "Draft")
