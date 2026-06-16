@@ -195,9 +195,9 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
         total_amount = 0
         base_total_amount = 0
         for item in pr.items:
-            total_qty += float(item.qty or 0)
-            total_amount += float(item.amount or 0)
-            base_total_amount += float(item.base_amount or 0)
+            total_qty += frappe.utils.flt(item.qty)
+            total_amount += frappe.utils.flt(item.amount)
+            base_total_amount += frappe.utils.flt(item.base_amount)
         pr.total_qty = total_qty
         pr.total = total_amount
         pr.base_total = base_total_amount
