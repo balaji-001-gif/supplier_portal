@@ -196,12 +196,22 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
             if batch_no:
                 if frappe.db.exists("Batch", batch_no):
                     pr_item.batch_no = batch_no
-                    pr_item.manufacturing_date = ge_item.get("manufacturing_date")
-                    pr_item.expiry_date = ge_item.get("expiry_date")
                 else:
+                    # Auto-create Batch record so batch flows through to PR
+                    batch = frappe.new_doc("Batch")
+                    batch.batch_id = batch_no
+                    batch.item = ge_item.get("item_code")
+                    batch.manufacturing_date = ge_item.get("manufacturing_date")
+                    batch.expiry_date = ge_item.get("expiry_date")
+                    batch.batch_qty = qty
+                    batch.save(ignore_permissions=True)
+                    pr_item.batch_no = batch.name
                     frappe.msgprint(frappe._(
-                        "Batch {0} for item {1} does not exist. Please create it first."
+                        "Batch {0} auto-created for item {1}."
                     ).format(batch_no, ge_item.get("item_code")))
+
+                pr_item.manufacturing_date = ge_item.get("manufacturing_date")
+                pr_item.expiry_date = ge_item.get("expiry_date")
 
             serial_nos = ge_item.get("serial_nos")
             if serial_nos:
