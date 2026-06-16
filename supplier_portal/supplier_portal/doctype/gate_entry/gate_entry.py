@@ -106,6 +106,7 @@ class GateEntry(Document):
                 "base_rate": po_item_rate * (po.conversion_rate if po else 1),
                 "amount": asn_item.dispatch_qty * po_item_rate,
                 "base_amount": asn_item.dispatch_qty * po_item_rate * (po.conversion_rate if po else 1),
+                "warehouse": pr.set_warehouse or frappe.db.get_value("Item", asn_item.item_code, "default_warehouse"),
                 "purchase_order": asn.purchase_order,
                 "purchase_order_item": asn_item.po_detail
             })
