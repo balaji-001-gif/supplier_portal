@@ -586,7 +586,12 @@
             <h1>ASN {{ asn.name }}</h1>
             <p><a href="/supplier_portal/asn" style="font-size: 13px;">← Back to ASNs</a></p>
         </div>
-        <span class="status-badge status-{{ asn.status.replace(' ', '') }}" style="font-size: 14px; padding: 4px 14px;">{{ asn.status }}</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            {% if asn.docstatus == 1 and asn_packages and asn_packages|selectattr('qr_generated')|list|length > 0 %}
+            <a href="/api/method/supplier_portal.api.qr_code.get_package_qr_pdf?asn_name={{ asn.name }}" class="btn btn-success" target="_blank" style="font-size: 13px;">🖨️ Print QR Codes</a>
+            {% endif %}
+            <span class="status-badge status-{{ asn.status.replace(' ', '') }}" style="font-size: 14px; padding: 4px 14px;">{{ asn.status }}</span>
+        </div>
     </div>
 
     <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
