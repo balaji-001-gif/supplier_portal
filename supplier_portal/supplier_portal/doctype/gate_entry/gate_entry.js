@@ -4,7 +4,7 @@ frappe.ui.form.on('Gate Entry', {
         if (frm.doc.docstatus === 1) {
             if (frm.doc.asn_reference) {
                 frm.add_custom_button(__('Create Purchase Receipt'), function() {
-                    createPRFromGateEntry(frm);
+                    createPRFromGateEntry(frm, this);
                 }, __('Actions'));
             }
             if (frm.doc.purchase_receipt) {
@@ -14,8 +14,7 @@ frappe.ui.form.on('Gate Entry', {
             }
         }
 
-        function createPRFromGateEntry(frm) {
-            var btn = this;
+        function createPRFromGateEntry(frm, btn) {
             // Disable button and show loading
             $(btn).prop('disabled', true).html(__('Creating PR...'));
 
