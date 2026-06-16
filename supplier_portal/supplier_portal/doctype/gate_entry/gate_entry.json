@@ -42,6 +42,8 @@
   "purchase_receipt_section",
   "purchase_receipt",
   "pr_status",
+  "items_section",
+  "items",
   "amended_from"
  ],
  "fields": [
@@ -235,6 +237,18 @@
    "fieldname": "remarks",
    "fieldtype": "Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items Received"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Gate Entry Items",
+   "options": "Gate Entry Item",
+   "read_only": 0
   },
   {
    "fieldname": "purchase_receipt_section",

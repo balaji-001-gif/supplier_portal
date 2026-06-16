@@ -66,5 +66,36 @@ class GateEntry(Document):
                 now=True
             )
 
+    def onload(self):
+        """Load items from ASN when the form is opened"""
+        if self.asn_reference and not self.get("items"):
+            self.load_items_from_asn()
+
+    def load_items_from_asn(self):
+        """Populate Gate Entry Items from the linked ASN"""
+        if not self.asn_reference:
+            return
+        asn = frappe.get_doc("Advance Shipment Notice", self.asn_reference)
+        for asn_item in asn.items:
+            self.append("items", {
+                "item_code": asn_item.item_code,
+                "item_name": asn_item.item_name,
+                "po_detail": asn_item.po_detail,
+                "uom": asn_item.uom,
+                "dispatch_qty": asn_item.dispatch_qty,
+                "received_qty": asn_item.dispatch_qty,
+                "batch_no": asn_item.batch_no,
+                "manufacturing_date": asn_item.manufacturing_date,
+                "expiry_date": asn_item.expiry_date,
+                "serial_nos": asn_item.serial_nos
+            })
+
+    @frappe.whitelist()
+    def refresh_items_from_asn(self):
+        """Re-populate items from the linked ASN (replaces existing)"""
+        self.set("items", [])
+        self.load_items_from_asn()
+        return True
+
 
 # API endpoints (scan_qr, get_gate_queue, create_gate_entry_from_asn) are in supplier_portal/api/gate_entry.py

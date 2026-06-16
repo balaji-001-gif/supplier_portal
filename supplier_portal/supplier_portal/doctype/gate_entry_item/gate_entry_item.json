@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "creation": "2025-06-16 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "po_detail",
+  "column_break_4",
+  "uom",
+  "dispatch_qty",
+  "received_qty",
+  "qty_section",
+  "accepted_qty",
+  "rejected_qty",
+  "column_break_10",
+  "rejection_reason",
+  "batch_section",
+  "batch_no",
+  "manufacturing_date",
+  "column_break_15",
+  "expiry_date",
+  "serial_nos"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "po_detail",
+   "fieldtype": "Data",
+   "label": "PO Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dispatch Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Received Qty"
+  },
+  {
+   "fieldname": "qty_section",
+   "fieldtype": "Section Break",
+   "label": "Acceptance"
+  },
+  {
+   "fieldname": "accepted_qty",
+   "fieldtype": "Float",
+   "label": "Accepted Qty"
+  },
+  {
+   "fieldname": "rejected_qty",
+   "fieldtype": "Float",
+   "label": "Rejected Qty"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Rejection Reason"
+  },
+  {
+   "fieldname": "batch_section",
+   "fieldtype": "Section Break",
+   "label": "Batch / Serial Details"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Batch No.",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "manufacturing_date",
+   "fieldtype": "Date",
+   "label": "Manufacturing Date"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "serial_nos",
+   "fieldtype": "Text",
+   "label": "Serial Numbers"
+  }
+ ],
+ "istable": 1,
+ "modified": "2025-06-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Supplier Portal",
+ "name": "Gate Entry Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

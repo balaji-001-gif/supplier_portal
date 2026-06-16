@@ -298,9 +298,31 @@ frappe.ui.form.on('Gate Entry', {
                         frm.set_value('lr_no', asn.lr_no);
                         frm.set_value('transport_company', asn.transport_company);
                         frm.set_value('num_packages', asn.num_packages);
+
+                        // Auto-populate items from ASN
+                        frm.clear_table('items');
+                        if (asn.items && asn.items.length) {
+                            asn.items.forEach(function(asn_item) {
+                                var row = frm.add_child('items');
+                                row.item_code = asn_item.item_code;
+                                row.item_name = asn_item.item_name;
+                                row.po_detail = asn_item.po_detail;
+                                row.uom = asn_item.uom;
+                                row.dispatch_qty = asn_item.dispatch_qty;
+                                row.received_qty = asn_item.dispatch_qty;
+                                row.batch_no = asn_item.batch_no;
+                                row.manufacturing_date = asn_item.manufacturing_date;
+                                row.expiry_date = asn_item.expiry_date;
+                                row.serial_nos = asn_item.serial_nos;
+                            });
+                            frm.refresh_field('items');
+                        }
                     }
                 }
             });
+        } else {
+            frm.clear_table('items');
+            frm.refresh_field('items');
         }
     },
 

@@ -132,28 +132,40 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
         pr.db_set("gate_entry_reference", ge.name)
         pr.db_set("asn_reference", ge.asn_reference)
 
-        # Build a lookup of user-provided qty overrides
+        # Build a lookup of user-provided qty overrides (item_code -> qty)
         items_qty_map = {}
         for itm in items:
             items_qty_map[itm.get("item_code")] = itm.get("qty")
 
-        for asn_item in asn.items:
-            # Get PO item rate
-            po_item_rate = 0
-            po_item_uom = asn_item.uom
-            po_conversion_factor = 1
-            po_warehouse = None
-            if po and asn_item.po_detail:
-                for po_item in po.items:
-                    if po_item.name == asn_item.po_detail:
-                        po_item_rate = po_item.rate
-                        po_item_uom = po_item.uom
-                        po_conversion_factor = po_item.conversion_factor or 1
-                        po_warehouse = po_item.warehouse
-                        break
+        # Use Gate Entry Items (with captured batch/serial data) as source
+        # Fall back to ASN items if Gate Entry has no items table populated
+        source_items = ge.get("items") if ge.get("items") else asn.items
 
-            # Use user-provided qty if given, else fall back to dispatch_qty
-            qty = items_qty_map.get(asn_item.item_code, asn_item.dispatch_qty)
+        # Build a quick lookup of PO item details (rate, uom, conversion_factor, warehouse)
+        po_item_details = {}
+        if po:
+            for po_item in po.items:
+                po_item_details[po_item.name] = {
+                    "rate": po_item.rate,
+                    "uom": po_item.uom,
+                    "conversion_factor": po_item.conversion_factor or 1,
+                    "warehouse": po_item.warehouse
+                }
+
+        for ge_item in source_items:
+            po_detail = ge_item.get("po_detail")
+            po_info = po_item_details.get(po_detail, {})
+
+            po_item_rate = po_info.get("rate", 0)
+            po_item_uom = po_info.get("uom", ge_item.get("uom"))
+            po_conversion_factor = po_info.get("conversion_factor", 1)
+            po_warehouse = po_info.get("warehouse")
+
+            # Use user-provided qty override, else captured received_qty, else dispatch_qty
+            qty = items_qty_map.get(
+                ge_item.get("item_code"),
+                ge_item.get("received_qty") or ge_item.get("dispatch_qty") or 0
+            )
             if not qty or float(qty) <= 0:
                 continue  # skip zero-qty items
 
@@ -163,12 +175,12 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
             base_amount_val = float(qty) * po_item_rate * (po.conversion_rate if po else 1)
 
             pr_item = pr.append("items", {
-                "item_code": asn_item.item_code,
-                "item_name": asn_item.item_name,
+                "item_code": ge_item.get("item_code"),
+                "item_name": ge_item.get("item_name"),
                 "qty": qty,
                 "uom": po_item_uom,
                 "conversion_factor": po_conversion_factor,
-                "stock_uom": po_item_uom,
+                "stock_uom": ge_item.get("uom") or po_item_uom,
                 "rate": po_item_rate,
                 "price_list_rate": po_item_rate,
                 "base_rate": base_rate_val,
@@ -176,16 +188,25 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
                 "base_amount": base_amount_val,
                 "warehouse": warehouse,
                 "purchase_order": asn.purchase_order,
-                "purchase_order_item": asn_item.po_detail
+                "purchase_order_item": po_detail
             })
 
-            # Set batch/serial only if batch exists
-            if asn_item.batch_no and frappe.db.exists("Batch", asn_item.batch_no):
-                pr_item.batch_no = asn_item.batch_no
-                pr_item.manufacturing_date = asn_item.manufacturing_date
-                pr_item.expiry_date = asn_item.expiry_date
-            if asn_item.serial_nos:
-                pr_item.serial_no = asn_item.serial_nos
+            # Use batch/serial from source (Gate Entry Items or ASN Items)
+            ge_has_items = bool(ge.get("items"))
+            batch_no = ge_item.get("batch_no") if ge_has_items else ge_item.batch_no
+            if batch_no:
+                if frappe.db.exists("Batch", batch_no):
+                    pr_item.batch_no = batch_no
+                    pr_item.manufacturing_date = ge_item.get("manufacturing_date") if ge_has_items else ge_item.manufacturing_date
+                    pr_item.expiry_date = ge_item.get("expiry_date") if ge_has_items else ge_item.expiry_date
+                else:
+                    frappe.msgprint(frappe._(
+                        "Batch {0} for item {1} does not exist. Please create it first."
+                    ).format(batch_no, ge_item.get("item_code")))
+
+            serial_nos = ge_item.get("serial_nos") if ge_has_items else ge_item.serial_nos
+            if serial_nos:
+                pr_item.serial_no = serial_nos
 
         if not pr.get("items"):
             frappe.throw(frappe._("No items to add to Purchase Receipt"))
