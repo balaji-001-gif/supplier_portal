@@ -2,15 +2,13 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.document import Document
-from frappe import _
 
-# This file provides the CustomPurchaseReceipt override referenced in hooks.py.
-# It extends ERPNext's Purchase Receipt with ASN and Gate Entry integration.
+# Import the real ERPNext PurchaseReceipt class so super() calls work correctly
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
 
 
-class CustomPurchaseReceipt(Document):
-    """Extended Purchase Receipt with ASN/Gate Entry fields"""
+class CustomPurchaseReceipt(PurchaseReceipt):
+    """Extended Purchase Receipt with ASN/Gate Entry integration"""
 
     def on_submit(self):
         """Update ASN item quantities on PR submit"""
