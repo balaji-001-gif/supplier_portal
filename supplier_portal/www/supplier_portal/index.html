@@ -170,6 +170,7 @@
         <a href="/supplier_portal/invoices" class="nav-link {% if current_page == 'invoices' %}active{% endif %}">🧾 Invoices</a>
         <a href="/supplier_portal/scorecard" class="nav-link {% if current_page == 'scorecard' %}active{% endif %}">📊 Scorecard</a>
         <a href="/supplier_portal/queries" class="nav-link {% if current_page == 'queries' %}active{% endif %}">💬 Queries</a>
+        <a href="/supplier_portal/gate_entry" class="nav-link {% if current_page == 'gate_entry' %}active{% endif %}">🚪 Gate Entry</a>
     </div>
 
     <!-- ======================== DASHBOARD ======================== -->
@@ -1031,8 +1032,28 @@
                 method: 'frappe.client.insert',
                 args: { doc: { doctype: 'Supplier Query', ...data } },
                 callback: function(r) {
-                    if (r.message) { frappe.msgprint(__('Query submitted successfully')); document.getElementById('queryModal').classList.remove('active'); location.reload(); }
-                    else { frappe.msgprint(__('Error submitting query')); }
+                    if (r.message) {
+                        // Submit the document to trigger on_submit (sets status to Open)
+                        frappe.call({
+                            method: 'frappe.client.submit',
+                            args: { doctype: 'Supplier Query', docname: r.message },
+                            callback: function(res) {
+                                if (res.message) {
+                                    frappe.msgprint(__('Query submitted successfully'));
+                                    document.getElementById('queryModal').classList.remove('active');
+                                    location.reload();
+                                } else {
+                                    frappe.msgprint(__('Error submitting query'));
+                                    document.getElementById('submitQueryBtn').disabled = false;
+                                    document.getElementById('submitQueryBtn').textContent = 'Submit Query';
+                                }
+                            }
+                        });
+                    } else {
+                        frappe.msgprint(__('Error submitting query'));
+                        document.getElementById('submitQueryBtn').disabled = false;
+                        document.getElementById('submitQueryBtn').textContent = 'Submit Query';
+                    }
                 }
             });
         });

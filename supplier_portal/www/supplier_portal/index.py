@@ -45,6 +45,9 @@ def get_context(context):
     elif path == "scorecard":
         context.current_page = "scorecard"
         _set_scorecard_context(context, user_supplier)
+    elif path == "gate_entry":
+        context.current_page = "gate_entry"
+        _set_gate_entry_context(context, user_supplier)
     else:
         frappe.throw(frappe._("Page not found"), frappe.NotFound)
 
@@ -235,4 +238,32 @@ def _set_scorecard_context(context, user_supplier):
             "documentation_compliance_rate", "invoice_accuracy_rate"
         ],
         order_by="fiscal_year_start desc"
+    )
+
+
+def _set_gate_entry_context(context, user_supplier):
+    """Gate Entry page with QR scanner"""
+    context.title = "Gate Entry - Supplier Portal"
+
+    # Get in-transit ASNs for gate entry
+    context.in_transit_asns = frappe.get_all(
+        "Advance Shipment Notice",
+        filters={
+            "supplier": user_supplier,
+            "status": ["in", ["In Transit", "Submitted"]]
+        },
+        fields=["name", "vehicle_no", "expected_delivery_date", "num_packages", "status"],
+        order_by="expected_delivery_date asc"
+    )
+
+    # Get today's gate entries
+    today = frappe.utils.nowdate()
+    context.todays_gate_entries = frappe.get_all(
+        "Gate Entry",
+        filters={
+            "supplier": user_supplier,
+            "entry_date": today
+        },
+        fields=["name", "entry_time", "asn_reference", "vehicle_no", "status"],
+        order_by="entry_time desc"
     )

@@ -52,6 +52,10 @@ frappe.supplier_portal.qr = {
             video.srcObject = stream;
             video.play();
 
+            // Show the video element and hide the placeholder
+            $(videoSelector).show();
+            $('#qr-placeholder').hide();
+
             // Show stop button, hide start button
             $('[data-action="start-qr-scan"]').hide();
             $('[data-action="stop-qr-scan"]').show();
@@ -74,6 +78,10 @@ frappe.supplier_portal.qr = {
             this.scannerStream = null;
         }
         this.isScanning = false;
+
+        // Hide the video element and show the placeholder
+        $('#qr-video').hide();
+        $('#qr-placeholder').show();
 
         // Show start button, hide stop button
         $('[data-action="start-qr-scan"]').show();
