@@ -57,7 +57,14 @@ frappe.ui.form.on('Gate Entry', {
                     script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
                     script.onload = callback;
                     script.onerror = function() {
-                        frappe.msgprint(__('Failed to load QR decoding library. Please check your internet connection.'));
+                        // Restore button state so user can retry
+                        var status = document.getElementById('scanner-status');
+                        if (status) {
+                            status.textContent = '❌ Failed to load QR decoder. Check internet and retry.';
+                            status.style.color = '#dc2626';
+                        }
+                        document.getElementById('start-scanner-btn').style.display = 'inline-block';
+                        frappe.msgprint(__('Failed to load QR decoding library. Please check your internet connection and try again.'));
                     };
                     document.head.appendChild(script);
                 }
@@ -183,7 +190,7 @@ frappe.ui.form.on('Gate Entry', {
                                     status.style.color = '#16a34a';
                                 }
                                 dialog.hide();
-                                frm.reload_doc();
+                                frappe.set_route('Form', 'Gate Entry', r.message.gate_entry);
                             } else {
                                 var errMsg = (r.message && r.message.message) || 'Unknown error';
                                 if (status) {
