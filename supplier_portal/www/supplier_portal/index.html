@@ -562,13 +562,15 @@
                 if (row) {
                     // Clone the row but clear batch fields
                     var newRow = document.createElement('div');
+                    // Po qty and received_qty both same so default dispatch_qty = 0 (user enters split qty)
+                    var poQtyNum = parseFloat(row.dataset.poQty) || 0;
                     newRow.innerHTML = makeItemRowHtml({
                         item_code: row.dataset.itemCode,
                         item_name: row.dataset.itemName,
                         name: row.dataset.poDetail,
                         uom: row.dataset.uom,
-                        qty: row.dataset.poQty,
-                        received_qty: 0
+                        qty: poQtyNum,
+                        received_qty: poQtyNum
                     });
                     row.parentNode.insertBefore(newRow.firstElementChild, row.nextSibling);
                 }
