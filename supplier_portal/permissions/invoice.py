@@ -16,9 +16,9 @@ def query_conditions(user):
 def has_permission(doc, ptype, user):
     """Check if user has permission for a specific invoice"""
     if "Supplier Portal User" in frappe.get_roles(user):
-        # For create operations, doc is None or a string (doctype name),
-        # so fall back to default role-based permissions
-        if not doc or not hasattr(doc, 'supplier') or not doc.supplier:
+        # Supplier-scoped filter applies only for read operations.
+        # For create/write, fall back to default role-based permissions.
+        if ptype != 'read':
             return None
         user_supplier = frappe.db.get_value("User", user, "supplier")
         if user_supplier and doc.supplier == user_supplier:
