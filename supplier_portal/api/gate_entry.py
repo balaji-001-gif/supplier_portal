@@ -91,8 +91,8 @@ def scan_qr(qr_data):
 def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
     """Create a Purchase Receipt draft pre-filled from Gate Entry and ASN data"""
     try:
-        if isinstance(items, str):
-            items = json.loads(items) if items else []
+        # Ensure items is always a list
+        items = json.loads(items) if isinstance(items, str) else (items or [])
 
         ge = frappe.get_doc("Gate Entry", gate_entry_name)
         if ge.docstatus != 1:
