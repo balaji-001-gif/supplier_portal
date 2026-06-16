@@ -15,5 +15,9 @@ def query_conditions(user):
 def has_permission(doc, ptype, user):
     """Gate entries are internal only"""
     if "Supplier Portal User" in frappe.get_roles(user):
+        # For create operations, fall back to default permissions
+        if not doc or not hasattr(doc, 'supplier'):
+            return None
+        # For existing documents, always deny portal users
         return False
     return None
