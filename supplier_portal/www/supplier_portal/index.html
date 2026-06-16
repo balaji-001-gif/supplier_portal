@@ -494,19 +494,29 @@
                 }
             });
         });
+        function makeItemRowHtml(item) {
+            var defaultQty = item.qty - (item.received_qty || 0);
+            return '<div class="item-row" data-item-code="' + item.item_code + '" data-item-name="' + item.item_name + '" data-po-detail="' + item.name + '" data-uom="' + item.uom + '" data-po-qty="' + item.qty + '">' +
+                '<div class="item-header"><div><span class="item-name">' + item.item_name + '</span> <span class="item-code">' + item.item_code + '</span></div><span style="font-size: 12px; color: #64748b;">PO Qty: ' + item.qty + ' ' + item.uom + '</span></div>' +
+                '<div class="form-row">' +
+                '<div class="form-group"><label>Dispatch Qty *</label><input type="number" class="form-control dispatch-qty" value="' + defaultQty + '" min="0" step="0.01" required></div>' +
+                '<div class="form-group"><label>Batch No. *</label><input type="text" class="form-control batch-no" placeholder="BATCH-..."></div>' +
+                '<div class="form-group"><label>Manufacturing Date</label><input type="date" class="form-control mfg-date"></div>' +
+                '<div class="form-group"><label>Expiry Date</label><input type="date" class="form-control expiry-date"></div>' +
+                '<div class="form-group"><label>UOM</label><input type="text" class="form-control" value="' + item.uom + '" readonly style="background: #f1f5f9;"></div>' +
+                '<div class="form-group" style="display: flex; align-items: flex-end;">' +
+                '<label>&nbsp;</label>' +
+                '<div style="display: flex; gap: 4px; width: 100%;">' +
+                '<input type="text" class="form-control" value="' + item.name + '" readonly style="background: #f1f5f9; font-size: 11px; flex: 1;">' +
+                '<button type="button" class="btn btn-outline add-batch-btn" title="Add another batch for this item" style="padding: 4px 8px; font-size: 16px; line-height: 1;">+</button>' +
+                '<button type="button" class="btn btn-outline remove-row-btn" title="Remove this row" style="padding: 4px 8px; font-size: 14px; line-height: 1; color: #dc2626; border-color: #fecaca;">×</button>' +
+                '</div></div>' +
+                '</div></div>';
+        }
         function renderItems(items) {
             var container = document.getElementById('itemsList');
-            container.innerHTML = items.map(function(item, idx) {
-                return '<div class="item-row">' +
-                    '<div class="item-header"><div><span class="item-name">' + item.item_name + '</span> <span class="item-code">' + item.item_code + '</span></div><span style="font-size: 12px; color: #64748b;">PO Qty: ' + item.qty + ' ' + item.uom + '</span></div>' +
-                    '<div class="form-row">' +
-                    '<div class="form-group"><label>Dispatch Qty *</label><input type="number" class="form-control dispatch-qty" value="' + (item.qty - (item.received_qty || 0)) + '" min="0" step="0.01" required></div>' +
-                    '<div class="form-group"><label>Batch No. *</label><input type="text" class="form-control batch-no" placeholder="BATCH-..."></div>' +
-                    '<div class="form-group"><label>Manufacturing Date</label><input type="date" class="form-control mfg-date"></div>' +
-                    '<div class="form-group"><label>Expiry Date</label><input type="date" class="form-control expiry-date"></div>' +
-                    '<div class="form-group"><label>UOM</label><input type="text" class="form-control" value="' + item.uom + '" readonly style="background: #f1f5f9;"></div>' +
-                    '<div class="form-group"><label>&nbsp;</label><input type="text" class="form-control" value="PO Detail: ' + item.name + '" readonly style="background: #f1f5f9; font-size: 11px;"></div>' +
-                    '</div></div>';
+            container.innerHTML = items.map(function(item) {
+                return makeItemRowHtml(item);
             }).join('');
         }
         function collectFormData() {
@@ -528,23 +538,53 @@
                 items: []
             };
             var rows = document.querySelectorAll('.item-row');
-            rows.forEach(function(row, idx) {
-                if (loadedItems[idx]) {
-                    data.items.push({
-                        item_code: loadedItems[idx].item_code,
-                        item_name: loadedItems[idx].item_name,
-                        po_detail: loadedItems[idx].name,
-                        po_qty: loadedItems[idx].qty,
-                        uom: loadedItems[idx].uom,
-                        dispatch_qty: parseFloat(row.querySelector('.dispatch-qty').value) || 0,
-                        batch_no: row.querySelector('.batch-no').value,
-                        manufacturing_date: row.querySelector('.mfg-date').value || null,
-                        expiry_date: row.querySelector('.expiry-date').value || null
-                    });
-                }
+            rows.forEach(function(row) {
+                data.items.push({
+                    item_code: row.dataset.itemCode,
+                    item_name: row.dataset.itemName,
+                    po_detail: row.dataset.poDetail,
+                    po_qty: parseFloat(row.dataset.poQty) || 0,
+                    uom: row.dataset.uom,
+                    dispatch_qty: parseFloat(row.querySelector('.dispatch-qty').value) || 0,
+                    batch_no: row.querySelector('.batch-no').value,
+                    manufacturing_date: row.querySelector('.mfg-date').value || null,
+                    expiry_date: row.querySelector('.expiry-date').value || null,
+                    serial_nos: ''
+                });
             });
             return data;
         }
+        // Event delegation for add-batch and remove-row buttons
+        document.getElementById('itemsList').addEventListener('click', function(e) {
+            var btn = e.target.closest('.add-batch-btn');
+            if (btn) {
+                var row = btn.closest('.item-row');
+                if (row) {
+                    // Clone the row but clear batch fields
+                    var newRow = document.createElement('div');
+                    newRow.innerHTML = makeItemRowHtml({
+                        item_code: row.dataset.itemCode,
+                        item_name: row.dataset.itemName,
+                        name: row.dataset.poDetail,
+                        uom: row.dataset.uom,
+                        qty: row.dataset.poQty,
+                        received_qty: 0
+                    });
+                    row.parentNode.insertBefore(newRow.firstElementChild, row.nextSibling);
+                }
+                return;
+            }
+            var rmBtn = e.target.closest('.remove-row-btn');
+            if (rmBtn) {
+                var itemRows = document.querySelectorAll('.item-row');
+                if (itemRows.length <= 1) {
+                    frappe.msgprint(__('At least one item row is required.'));
+                    return;
+                }
+                var row = rmBtn.closest('.item-row');
+                if (row) row.remove();
+            }
+        });
         document.getElementById('submitBtn').addEventListener('click', function() {
             var data = collectFormData();
             if (!data.purchase_order || !data.vehicle_no || data.items.length === 0) { frappe.msgprint(__('Please fill all required fields')); return; }
