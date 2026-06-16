@@ -1108,10 +1108,10 @@
                 args: { doc: docData },
                 callback: function(r) {
                     if (r.message) {
-                        // Submit the document to trigger on_submit (sets status to Open)
+                        var docname = r.message.name || r.message;
                         frappe.call({
                             method: 'frappe.client.submit',
-                            args: { doctype: 'Supplier Query', docname: r.message },
+                            args: { doctype: 'Supplier Query', docname: docname },
                             callback: function(res) {
                                 if (res.message) {
                                     frappe.msgprint(__('Query submitted successfully'));
@@ -1122,6 +1122,11 @@
                                     document.getElementById('submitQueryBtn').disabled = false;
                                     document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                                 }
+                            },
+                            error: function(err) {
+                                frappe.msgprint(__('Error: ') + err.message);
+                                document.getElementById('submitQueryBtn').disabled = false;
+                                document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                             }
                         });
                     } else {
@@ -1129,6 +1134,11 @@
                         document.getElementById('submitQueryBtn').disabled = false;
                         document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                     }
+                },
+                error: function(err) {
+                    frappe.msgprint(__('Error: ') + err.message);
+                    document.getElementById('submitQueryBtn').disabled = false;
+                    document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                 }
             });
         });
