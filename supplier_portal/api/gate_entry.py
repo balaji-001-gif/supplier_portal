@@ -95,6 +95,8 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
             items = json.loads(items) if items else []
 
         ge = frappe.get_doc("Gate Entry", gate_entry_name)
+        if ge.docstatus != 1:
+            frappe.throw(frappe._("Gate Entry must be submitted first"))
         if not ge.asn_reference:
             frappe.throw(frappe._("Gate Entry has no ASN reference"))
 
@@ -106,7 +108,7 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
         pr.posting_date = ge.entry_date
         pr.posting_time = ge.entry_time
         pr.set_posting_time = 1
-        pr.bill_no = asn.delivery_challan_no if not ge.lr_no else ge.lr_no
+        pr.bill_no = asn.delivery_challan_no
         pr.bill_date = asn.challan_date
         pr.lr_no = ge.lr_no
         pr.transporter_name = ge.transport_company
@@ -155,7 +157,7 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
             if not qty or float(qty) <= 0:
                 continue  # skip zero-qty items
 
-            warehouse = po_warehouse or (pr.set_warehouse if po else None)
+            warehouse = po_warehouse or (pr.set_warehouse if po else None) or frappe.db.get_single_value("Buying Settings", "supplier_warehouse") or frappe.db.get_value("Company", pr.company, "default_warehouse")
             base_rate_val = po_item_rate * (po.conversion_rate if po else 1)
             amount_val = float(qty) * po_item_rate
             base_amount_val = float(qty) * po_item_rate * (po.conversion_rate if po else 1)

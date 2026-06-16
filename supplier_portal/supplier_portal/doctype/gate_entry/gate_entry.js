@@ -59,6 +59,10 @@ frappe.ui.form.on('Gate Entry', {
                                 return;
                             }
 
+                            // Show loading state
+                            dialog.set_primary_action(__('Creating...'), function() {});
+                            dialog.set_disable_primary_action(true);
+
                             frappe.call({
                                 method: 'supplier_portal.api.gate_entry.create_purchase_receipt_from_gate_entry',
                                 args: {
@@ -66,6 +70,10 @@ frappe.ui.form.on('Gate Entry', {
                                     items: JSON.stringify(itemsData)
                                 },
                                 callback: function(res) {
+                                    // Re-enable button on completion (success or error)
+                                    dialog.set_primary_action(__('Create Purchase Receipt'), dialog.primary_action);
+                                    dialog.set_disable_primary_action(false);
+
                                     if (res.message && res.message.success) {
                                         frappe.show_alert({
                                             message: __('Purchase Receipt {0} created', [res.message.purchase_receipt]),
