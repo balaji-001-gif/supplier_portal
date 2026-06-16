@@ -91,12 +91,14 @@ frappe.ui.form.on('Gate Entry', {
 
                 d.show();
 
-                // Use d.$wrapper.find() — safer than document.getElementById() since DOM may not be ready yet
+                // Attach scanner button handlers via d.$wrapper — always safe after d.show()
                 d.$wrapper.find('#start-scanner-btn').on('click', startScanner);
                 d.$wrapper.find('#stop-scanner-btn').on('click', stopScanner);
 
-                // Clean up camera when dialog is closed by any means (Escape, click-outside, Close button)
-                d.onhide = stopScanner;
+                // Clean up camera when dialog is dismissed by any means (Escape, click-outside, Close button)
+                d.$wrapper.on('hidden.bs.modal', function() {
+                    stopScanner();
+                });
             }, __('Actions'));
         }
     },
