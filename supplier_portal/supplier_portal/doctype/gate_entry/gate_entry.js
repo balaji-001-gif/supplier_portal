@@ -52,6 +52,17 @@ frappe.ui.form.on('Gate Entry', {
 
                     if (!video) return;
 
+                    // Check for secure context — mediaDevices is undefined on HTTP
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        if (status) {
+                            status.textContent = '❌ Camera requires HTTPS. Please access this page via https://';
+                            status.style.color = '#dc2626';
+                        }
+                        frappe.msgprint(__('Camera access requires a secure connection (HTTPS). ' +
+                            'Please access this page via https:// instead of http://'));
+                        return;
+                    }
+
                     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                         .then(function(stream) {
                             scannerStream = stream;
@@ -62,12 +73,16 @@ frappe.ui.form.on('Gate Entry', {
                             document.getElementById('start-scanner-btn').style.display = 'none';
                             document.getElementById('stop-scanner-btn').style.display = 'inline-block';
                             if (status) {
-                                status.textContent = 'Camera active. Point at QR code.';
+                                status.textContent = '✅ Camera active. Point at QR code.';
                                 status.style.color = '#16a34a';
                             }
                         })
                         .catch(function(err) {
-                            frappe.msgprint(__('Camera access denied. Please use a QR scanner device.'));
+                            if (status) {
+                                status.textContent = '❌ Camera access denied: ' + err.message;
+                                status.style.color = '#dc2626';
+                            }
+                            frappe.msgprint(__('Camera access denied: {0}', [err.message]));
                         });
                 }
 
