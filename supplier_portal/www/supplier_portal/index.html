@@ -61,6 +61,7 @@
     .status-Unloading { background: #fef9c3; color: #ca8a04; }
     .status-Received { background: #dcfce7; color: #16a34a; }
     .status-Cancelled { background: #fee2e2; color: #dc2626; }
+    .status-Ready { background: #f1f5f9; color: #64748b; }
     .status-Pending\ Approval { background: #fef3c7; color: #d97706; }
     .status-Approved { background: #dcfce7; color: #16a34a; }
     .status-Rejected { background: #fee2e2; color: #dc2626; }
@@ -576,6 +577,123 @@
             });
         });
     </script>
+
+    <!-- ======================== ASN DETAIL ======================== -->
+    {% elif current_page == 'asn_detail' %}
+
+    <div class="page-header">
+        <div>
+            <h1>ASN {{ asn.name }}</h1>
+            <p><a href="/supplier_portal/asn" style="font-size: 13px;">← Back to ASNs</a></p>
+        </div>
+        <span class="status-badge status-{{ asn.status.replace(' ', '') }}" style="font-size: 14px; padding: 4px 14px;">{{ asn.status }}</span>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-label">ASN Date</div>
+            <div class="stat-value" style="font-size: 16px;">{{ asn.asn_date }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-label">Expected Delivery</div>
+            <div class="stat-value" style="font-size: 16px;">{{ asn.expected_delivery_date }}{% if asn.expected_arrival_time %} {{ asn.expected_arrival_time }}{% endif %}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-label">PO Reference</div>
+            <div class="stat-value" style="font-size: 16px;">{{ asn.purchase_order }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-label">Packages</div>
+            <div class="stat-value" style="font-size: 16px;">{{ asn.num_packages or 0 }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Vehicle & Driver Details</h3>
+        <div class="form-row" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 0;">
+            <div><strong>Vehicle No:</strong> {{ asn.vehicle_no or '-' }}</div>
+            <div><strong>Driver:</strong> {{ asn.driver_name or '-' }} {% if asn.driver_mobile %}({{ asn.driver_mobile }}){% endif %}</div>
+            <div><strong>Transport:</strong> {{ asn.transport_company or '-' }}</div>
+            <div><strong>LR No:</strong> {{ asn.lr_no or '-' }}</div>
+            <div><strong>E-Way Bill:</strong> {{ asn.eway_bill_no or '-' }}</div>
+            <div><strong>Delivery Challan:</strong> {{ asn.delivery_challan_no or '-' }} {% if asn.challan_date %}({{ asn.challan_date }}){% endif %}</div>
+        </div>
+    </div>
+
+    {% if asn_items %}
+    <div class="card">
+        <h3>Items ({{ asn_items|length }})</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item Code</th>
+                    <th>Item Name</th>
+                    <th>PO Qty</th>
+                    <th>Dispatch Qty</th>
+                    <th>Received Qty</th>
+                    <th>UOM</th>
+                    <th>Batch No.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in asn_items %}
+                <tr>
+                    <td>{{ item.idx }}</td>
+                    <td>{{ item.item_code }}</td>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ "%.2f"|format(item.po_qty) if item.po_qty else '-' }}</td>
+                    <td><strong>{{ "%.2f"|format(item.dispatch_qty) }}</strong></td>
+                    <td>{{ "%.2f"|format(item.received_qty) if item.received_qty else '-' }}</td>
+                    <td>{{ item.uom }}</td>
+                    <td>{{ item.batch_no or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if asn_packages %}
+    <div class="card">
+        <h3>Packages ({{ asn_packages|length }})</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Package ID</th>
+                    <th>Type</th>
+                    <th>Weight (kg)</th>
+                    <th>Dimensions</th>
+                    <th>QR Generated</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pkg in asn_packages %}
+                <tr>
+                    <td><strong>{{ pkg.package_id }}</strong></td>
+                    <td>{{ pkg.package_type }}</td>
+                    <td>{% if pkg.gross_weight %}{{ pkg.gross_weight }}{% else %}-{% endif %}</td>
+                    <td>{% if pkg.length %}{{ pkg.length }}×{{ pkg.width }}×{{ pkg.height }} cm{% else %}-{% endif %}</td>
+                    <td>{% if pkg.qr_generated %}✅{% else %}❌{% endif %}</td>
+                    <td><span class="status-badge status-{{ pkg.package_status.replace(' ', '') if pkg.package_status else 'Ready' }}">{{ pkg.package_status or 'Ready' }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if asn.remarks %}
+    <div class="card">
+        <h3>Remarks</h3>
+        <p style="color: #475569; font-size: 13px;">{{ asn.remarks }}</p>
+    </div>
+    {% endif %}
 
     <!-- ======================== PURCHASE ORDERS ======================== -->
     {% elif current_page == 'purchase_orders' %}

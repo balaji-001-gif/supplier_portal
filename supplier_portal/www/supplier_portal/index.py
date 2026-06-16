@@ -30,6 +30,9 @@ def get_context(context):
     elif path == "asn/new":
         context.current_page = "asn_new"
         _set_asn_new_context(context, user_supplier)
+    elif path and path.startswith("asn/"):
+        context.current_page = "asn_detail"
+        _set_asn_detail_context(context, user_supplier, path.replace("asn/", ""))
     elif path == "invoices":
         context.current_page = "invoices"
         _set_invoices_context(context, user_supplier)
@@ -206,6 +209,17 @@ def _set_queries_context(context, user_supplier):
     )
 
     context.statuses = ["Open", "Responded", "Closed"]
+
+
+def _set_asn_detail_context(context, user_supplier, asn_name):
+    """ASN detail view page"""
+    asn = frappe.get_doc("Advance Shipment Notice", asn_name)
+    if asn.supplier != user_supplier:
+        frappe.throw(frappe._("Not found"), frappe.NotFound)
+    context.title = "ASN {0} - Supplier Portal".format(asn_name)
+    context.asn = asn
+    context.asn_items = asn.items
+    context.asn_packages = asn.packages
 
 
 def _set_scorecard_context(context, user_supplier):
