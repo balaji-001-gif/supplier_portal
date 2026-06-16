@@ -91,9 +91,9 @@ frappe.ui.form.on('Gate Entry', {
 
                 d.show();
 
-                // Attach event listeners — DOM elements are available synchronously
-                document.getElementById('start-scanner-btn').addEventListener('click', startScanner);
-                document.getElementById('stop-scanner-btn').addEventListener('click', stopScanner);
+                // Use d.$wrapper.find() — safer than document.getElementById() since DOM may not be ready yet
+                d.$wrapper.find('#start-scanner-btn').on('click', startScanner);
+                d.$wrapper.find('#stop-scanner-btn').on('click', stopScanner);
 
                 // Clean up camera when dialog is closed by any means (Escape, click-outside, Close button)
                 d.onhide = stopScanner;
