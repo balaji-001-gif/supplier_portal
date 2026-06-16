@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import frappe
-import json
 from frappe.model.document import Document
 from frappe.utils import now_datetime, time_diff_in_seconds
 
