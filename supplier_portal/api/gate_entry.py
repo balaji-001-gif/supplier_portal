@@ -190,8 +190,20 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
         if not pr.get("items"):
             frappe.throw(frappe._("No items to add to Purchase Receipt"))
 
-        # Calculate totals before save
-        pr.run_method("calculate_taxes_and_totals")
+        # Manually calculate header totals from items
+        total_qty = 0
+        total_amount = 0
+        base_total_amount = 0
+        for item in pr.items:
+            total_qty += float(item.qty or 0)
+            total_amount += float(item.amount or 0)
+            base_total_amount += float(item.base_amount or 0)
+        pr.total_qty = total_qty
+        pr.total = total_amount
+        pr.base_total = base_total_amount
+        pr.net_total = total_amount
+        pr.base_net_total = base_total_amount
+
         pr.save(ignore_permissions=True)
 
         # Link PR back to Gate Entry
