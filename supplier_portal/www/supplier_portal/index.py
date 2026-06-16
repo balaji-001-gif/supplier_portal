@@ -43,7 +43,7 @@ def get_context(context):
         context.current_page = "scorecard"
         _set_scorecard_context(context, user_supplier)
     else:
-        frappe.throw(frappe._("Page not found"), frappe.PageNotFoundError)
+        frappe.throw(frappe._("Page not found"), frappe.NotFound)
 
     return context
 
