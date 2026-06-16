@@ -2,11 +2,117 @@ frappe.ui.form.on('Gate Entry', {
     refresh: function(frm) {
         // Actions for submitted gate entries
         if (frm.doc.docstatus === 1) {
+            if (frm.doc.asn_reference) {
+                frm.add_custom_button(__('Create Purchase Receipt'), function() {
+                    createPRFromGateEntry(frm);
+                }, __('Actions'));
+            }
             if (frm.doc.purchase_receipt) {
                 frm.add_custom_button(__('View Purchase Receipt'), function() {
                     frappe.set_route('Form', 'Purchase Receipt', frm.doc.purchase_receipt);
                 }, __('Actions'));
             }
+        }
+
+        function createPRFromGateEntry(frm) {
+            frappe.call({
+                method: 'frappe.client.get',
+                args: {
+                    doctype: 'Advance Shipment Notice',
+                    name: frm.doc.asn_reference
+                },
+                callback: function(r) {
+                    if (!r.message) {
+                        frappe.msgprint(__('ASN not found'));
+                        return;
+                    }
+                    var asn = r.message;
+                    var items = asn.items || [];
+
+                    // Create dialog with editable item quantities
+                    var dialog = new frappe.ui.Dialog({
+                        title: __('Create Purchase Receipt from {0}', [frm.doc.name]),
+                        fields: [
+                            {
+                                fieldtype: 'HTML',
+                                fieldname: 'info',
+                                options: '<p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">'
+                                    + __('Adjust received quantities as needed. Items with qty 0 will be skipped.') + '</p>'
+                            }
+                        ],
+                        primary_action_label: __('Create Purchase Receipt'),
+                        primary_action: function() {
+                            var itemsData = [];
+                            items.forEach(function(item, idx) {
+                                var qtyField = dialog.get_value('qty_' + idx);
+                                var qty = parseFloat(qtyField) || 0;
+                                if (qty > 0) {
+                                    itemsData.push({
+                                        item_code: item.item_code,
+                                        qty: qty
+                                    });
+                                }
+                            });
+
+                            if (itemsData.length === 0) {
+                                frappe.msgprint(__('At least one item must have qty > 0'));
+                                return;
+                            }
+
+                            frappe.call({
+                                method: 'supplier_portal.api.gate_entry.create_purchase_receipt_from_gate_entry',
+                                args: {
+                                    gate_entry_name: frm.doc.name,
+                                    items: JSON.stringify(itemsData)
+                                },
+                                callback: function(res) {
+                                    if (res.message && res.message.success) {
+                                        frappe.show_alert({
+                                            message: __('Purchase Receipt {0} created', [res.message.purchase_receipt]),
+                                            indicator: 'green'
+                                        });
+                                        dialog.hide();
+                                        frappe.set_route('Form', 'Purchase Receipt', res.message.purchase_receipt);
+                                    } else {
+                                        frappe.msgprint(__('Error: {0}', [res.message.message || 'Unknown error']));
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    // Add editable qty fields for each item
+                    items.forEach(function(item, idx) {
+                        var dispatchQty = item.dispatch_qty || item.qty || 0;
+                        dialog.add_fields([{
+                            fieldtype: 'Section Break',
+                            fieldname: 'sec_' + idx
+                        }, {
+                            fieldtype: 'Data',
+                            fieldname: 'item_label_' + idx,
+                            label: __('Item'),
+                            default: item.item_code + ' - ' + item.item_name,
+                            read_only: 1
+                        }, {
+                            fieldtype: 'Float',
+                            fieldname: 'qty_' + idx,
+                            label: __('Received Qty'),
+                            default: dispatchQty
+                        }, {
+                            fieldtype: 'Column Break',
+                            fieldname: 'col_' + idx
+                        }, {
+                            fieldtype: 'Data',
+                            fieldname: 'uom_' + idx,
+                            label: __('UOM'),
+                            default: item.uom,
+                            read_only: 1
+                        }]);
+                    });
+
+                    dialog.show();
+                }
+            });
         }
 
         // Open QR Scanner dialog

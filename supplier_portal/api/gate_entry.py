@@ -88,6 +88,123 @@ def scan_qr(qr_data):
 
 
 @frappe.whitelist()
+def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
+    """Create a Purchase Receipt draft pre-filled from Gate Entry and ASN data"""
+    try:
+        if isinstance(items, str):
+            items = json.loads(items) if items else []
+
+        ge = frappe.get_doc("Gate Entry", gate_entry_name)
+        if not ge.asn_reference:
+            frappe.throw(frappe._("Gate Entry has no ASN reference"))
+
+        asn = frappe.get_doc("Advance Shipment Notice", ge.asn_reference)
+        po = frappe.get_doc("Purchase Order", asn.purchase_order) if asn.purchase_order else None
+
+        pr = frappe.new_doc("Purchase Receipt")
+        pr.supplier = ge.supplier
+        pr.posting_date = ge.entry_date
+        pr.posting_time = ge.entry_time
+        pr.set_posting_time = 1
+        pr.bill_no = asn.delivery_challan_no if not ge.lr_no else ge.lr_no
+        pr.bill_date = asn.challan_date
+        pr.lr_no = ge.lr_no
+        pr.transporter_name = ge.transport_company
+
+        # Financial fields from PO
+        if po:
+            pr.company = po.company
+            pr.currency = po.currency
+            pr.conversion_rate = po.conversion_rate
+            pr.plc_conversion_rate = po.plc_conversion_rate
+            pr.price_list_currency = po.price_list_currency
+            pr.buying_price_list = po.buying_price_list
+            pr.set_warehouse = po.set_warehouse
+        else:
+            pr.company = frappe.defaults.get_user_default("company")
+            pr.currency = frappe.defaults.get_global_default("currency") or "INR"
+            pr.conversion_rate = 1
+            pr.plc_conversion_rate = 1
+
+        # Custom fields linking back to Gate Entry
+        pr.db_set("gate_entry_reference", ge.name)
+        pr.db_set("asn_reference", ge.asn_reference)
+
+        # Build a lookup of user-provided qty overrides
+        items_qty_map = {}
+        for itm in items:
+            items_qty_map[itm.get("item_code")] = itm.get("qty")
+
+        for asn_item in asn.items:
+            # Get PO item rate
+            po_item_rate = 0
+            po_item_uom = asn_item.uom
+            po_conversion_factor = 1
+            po_warehouse = None
+            if po and asn_item.po_detail:
+                for po_item in po.items:
+                    if po_item.name == asn_item.po_detail:
+                        po_item_rate = po_item.rate
+                        po_item_uom = po_item.uom
+                        po_conversion_factor = po_item.conversion_factor or 1
+                        po_warehouse = po_item.warehouse
+                        break
+
+            # Use user-provided qty if given, else fall back to dispatch_qty
+            qty = items_qty_map.get(asn_item.item_code, asn_item.dispatch_qty)
+            if not qty or float(qty) <= 0:
+                continue  # skip zero-qty items
+
+            warehouse = po_warehouse or (pr.set_warehouse if po else None)
+            base_rate_val = po_item_rate * (po.conversion_rate if po else 1)
+            amount_val = float(qty) * po_item_rate
+            base_amount_val = float(qty) * po_item_rate * (po.conversion_rate if po else 1)
+
+            pr_item = pr.append("items", {
+                "item_code": asn_item.item_code,
+                "item_name": asn_item.item_name,
+                "qty": qty,
+                "uom": po_item_uom,
+                "conversion_factor": po_conversion_factor,
+                "stock_uom": po_item_uom,
+                "rate": po_item_rate,
+                "price_list_rate": po_item_rate,
+                "base_rate": base_rate_val,
+                "amount": amount_val,
+                "base_amount": base_amount_val,
+                "warehouse": warehouse,
+                "purchase_order": asn.purchase_order,
+                "purchase_order_item": asn_item.po_detail
+            })
+
+            # Set batch/serial only if batch exists
+            if asn_item.batch_no and frappe.db.exists("Batch", asn_item.batch_no):
+                pr_item.batch_no = asn_item.batch_no
+                pr_item.manufacturing_date = asn_item.manufacturing_date
+                pr_item.expiry_date = asn_item.expiry_date
+            if asn_item.serial_nos:
+                pr_item.serial_no = asn_item.serial_nos
+
+        if not pr.get("items"):
+            frappe.throw(frappe._("No items to add to Purchase Receipt"))
+
+        pr.save(ignore_permissions=True)
+
+        # Link PR back to Gate Entry
+        ge.db_set("purchase_receipt", pr.name)
+        ge.db_set("pr_status", "Draft")
+
+        return {
+            "success": True,
+            "purchase_receipt": pr.name
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "PR Creation from Gate Entry")
+        return {"success": False, "message": str(e)}
+
+
+@frappe.whitelist()
 def start_unloading(gate_entry_name, unloading_bay=None):
     """Start unloading process for a gate entry"""
     gate_entry = frappe.get_doc("Gate Entry", gate_entry_name)
