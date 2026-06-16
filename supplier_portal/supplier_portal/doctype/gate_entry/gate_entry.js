@@ -12,30 +12,32 @@ frappe.ui.form.on('Gate Entry', {
         // Open QR Scanner dialog
         if (frm.doc.docstatus === 0) {
             frm.add_custom_button(__('Open QR Scanner'), function() {
-                let scannerStream = null;
+                var scannerStream = null;
+                var scanInterval = null;
 
-                let d = new frappe.ui.Dialog({
+                var d = new frappe.ui.Dialog({
                     title: __('Scan QR Code'),
                     fields: [
                         {
                             fieldtype: 'HTML',
                             fieldname: 'qr_scanner',
-                            options: `
-                                <div style="text-align: center;">
-                                    <video id="qr-video" style="width: 100%; max-width: 400px; border: 2px dashed #ccc; border-radius: 8px; display: none;"></video>
-                                    <div id="qr-placeholder" style="padding: 40px 20px; color: #94a3b8;">
-                                        <div style="font-size: 48px; margin-bottom: 12px;">📷</div>
-                                        <div>Camera off — click Start to begin scanning</div>
-                                    </div>
-                                    <p id="scanner-status" style="font-size: 12px; margin-top: 8px; min-height: 20px; color: #64748b;"></p>
-                                    <button class="btn btn-sm btn-primary" id="start-scanner-btn">
-                                        📷 Start Camera
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" id="stop-scanner-btn" style="display:none;">
-                                        ⏹ Stop Camera
-                                    </button>
-                                </div>
-                            `
+                            options: '\
+                                <div style="text-align: center;">\
+                                    <video id="qr-video" style="width: 100%; max-width: 400px; border: 2px dashed #ccc; border-radius: 8px; display: none;"></video>\
+                                    <canvas id="qr-canvas" style="display:none;"></canvas>\
+                                    <div id="qr-placeholder" style="padding: 40px 20px; color: #94a3b8;">\
+                                        <div style="font-size: 48px; margin-bottom: 12px;">📷</div>\
+                                        <div>Camera off — click Start to begin scanning</div>\
+                                    </div>\
+                                    <p id="scanner-status" style="font-size: 12px; margin-top: 8px; min-height: 20px; color: #64748b;"></p>\
+                                    <button class="btn btn-sm btn-primary" id="start-scanner-btn">\
+                                        📷 Start Camera\
+                                    </button>\
+                                    <button class="btn btn-sm btn-danger" id="stop-scanner-btn" style="display:none;">\
+                                        ⏹ Stop Camera\
+                                    </button>\
+                                </div>\
+                            '
                         }
                     ],
                     primary_action_label: __('Close'),
@@ -45,60 +47,179 @@ frappe.ui.form.on('Gate Entry', {
                     }
                 });
 
+                // Load jsQR library from CDN
+                function loadJsQR(callback) {
+                    if (typeof jsQR !== 'undefined') {
+                        callback();
+                        return;
+                    }
+                    var script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+                    script.onload = callback;
+                    script.onerror = function() {
+                        frappe.msgprint(__('Failed to load QR decoding library. Please check your internet connection.'));
+                    };
+                    document.head.appendChild(script);
+                }
+
                 function startScanner() {
-                    let video = document.getElementById('qr-video');
-                    let placeholder = document.getElementById('qr-placeholder');
-                    let status = document.getElementById('scanner-status');
+                    var video = document.getElementById('qr-video');
+                    var placeholder = document.getElementById('qr-placeholder');
+                    var status = document.getElementById('scanner-status');
 
                     if (!video) return;
 
-                    // Check for secure context — mediaDevices is undefined on HTTP
+                    // Check for secure context
                     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                         if (status) {
                             status.textContent = '❌ Camera requires HTTPS. Please access this page via https://';
                             status.style.color = '#dc2626';
                         }
-                        frappe.msgprint(__('Camera access requires a secure connection (HTTPS). ' +
-                            'Please access this page via https:// instead of http://'));
+                        frappe.msgprint(__('Camera access requires a secure connection (HTTPS). Please access this page via https:// instead of http://'));
                         return;
                     }
 
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                        .then(function(stream) {
-                            scannerStream = stream;
-                            video.srcObject = stream;
-                            video.play();
-                            video.style.display = 'block';
-                            if (placeholder) placeholder.style.display = 'none';
-                            document.getElementById('start-scanner-btn').style.display = 'none';
-                            document.getElementById('stop-scanner-btn').style.display = 'inline-block';
-                            if (status) {
-                                status.textContent = '✅ Camera active. Point at QR code.';
-                                status.style.color = '#16a34a';
+                    // Load jsQR first, then start camera
+                    loadJsQR(function() {
+                        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                            .then(function(stream) {
+                                scannerStream = stream;
+                                video.srcObject = stream;
+                                video.play();
+                                video.style.display = 'block';
+                                if (placeholder) placeholder.style.display = 'none';
+                                document.getElementById('start-scanner-btn').style.display = 'none';
+                                document.getElementById('stop-scanner-btn').style.display = 'inline-block';
+                                if (status) {
+                                    status.textContent = '✅ Camera active. Point at QR code.';
+                                    status.style.color = '#16a34a';
+                                }
+                                // Start scanning frames
+                                startFrameScan(video, status);
+                            })
+                            .catch(function(err) {
+                                if (status) {
+                                    status.textContent = '❌ Camera access denied: ' + err.message;
+                                    status.style.color = '#dc2626';
+                                }
+                                frappe.msgprint(__('Camera access denied: {0}', [err.message]));
+                            });
+                    });
+                }
+
+                function startFrameScan(video, status) {
+                    var canvas = document.getElementById('qr-canvas');
+                    if (!canvas) return;
+                    var ctx = canvas.getContext('2d');
+
+                    // Clear any existing interval
+                    if (scanInterval) {
+                        clearInterval(scanInterval);
+                    }
+
+                    scanInterval = setInterval(function() {
+                        if (!video || video.readyState !== video.HAVE_ENOUGH_DATA || !scannerStream) {
+                            return;
+                        }
+
+                        // Match canvas size to video
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+
+                        // Draw the video frame to the canvas
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                        // Get image data for QR decoding
+                        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                        try {
+                            var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                inversionAttempts: 'dontInvert'
+                            });
+
+                            if (code && code.data) {
+                                // QR code detected!
+                                if (status) {
+                                    status.textContent = '✅ QR Code detected! Processing...';
+                                    status.style.color = '#16a34a';
+                                }
+
+                                // Stop scanning
+                                stopScanner();
+
+                                // Process the QR code data
+                                processQRCode(code.data, frm, d, status);
                             }
-                        })
-                        .catch(function(err) {
+                        } catch(e) {
+                            // jsQR throws on some edge cases, ignore
+                        }
+                    }, 500); // Check every 500ms
+                }
+
+                function processQRCode(qrData, frm, dialog, status) {
+                    // Try to parse as JSON (ASN QR codes are JSON)
+                    var payload;
+                    try {
+                        payload = JSON.parse(qrData);
+                    } catch(e) {
+                        // Not JSON — treat as raw text
+                        payload = { doc_type: 'Raw', doc_id: qrData };
+                    }
+
+                    // Call the server API to process the scan
+                    frappe.call({
+                        method: 'supplier_portal.api.gate_entry.scan_qr',
+                        args: {
+                            qr_data: JSON.stringify(payload)
+                        },
+                        callback: function(r) {
+                            if (r.message && r.message.success) {
+                                frappe.show_alert({
+                                    message: __('Gate entry created: {0}', [r.message.gate_entry]),
+                                    indicator: 'green'
+                                });
+                                if (status) {
+                                    status.textContent = '✅ Gate entry created!';
+                                    status.style.color = '#16a34a';
+                                }
+                                dialog.hide();
+                                frm.reload_doc();
+                            } else {
+                                var errMsg = (r.message && r.message.message) || 'Unknown error';
+                                if (status) {
+                                    status.textContent = '❌ Error: ' + errMsg;
+                                    status.style.color = '#dc2626';
+                                }
+                                frappe.msgprint(__('Scan failed: {0}', [errMsg]));
+                            }
+                        },
+                        error: function(err) {
                             if (status) {
-                                status.textContent = '❌ Camera access denied: ' + err.message;
+                                status.textContent = '❌ Server error: ' + err.message;
                                 status.style.color = '#dc2626';
                             }
-                            frappe.msgprint(__('Camera access denied: {0}', [err.message]));
-                        });
+                            frappe.msgprint(__('Server error: {0}', [err.message]));
+                        }
+                    });
                 }
 
                 function stopScanner() {
+                    if (scanInterval) {
+                        clearInterval(scanInterval);
+                        scanInterval = null;
+                    }
                     if (scannerStream) {
                         scannerStream.getTracks().forEach(function(t) { t.stop(); });
                         scannerStream = null;
                     }
-                    let video = document.getElementById('qr-video');
-                    let placeholder = document.getElementById('qr-placeholder');
-                    let status = document.getElementById('scanner-status');
+                    var video = document.getElementById('qr-video');
+                    var placeholder = document.getElementById('qr-placeholder');
+                    var status = document.getElementById('scanner-status');
                     if (video) video.style.display = 'none';
                     if (placeholder) placeholder.style.display = 'block';
                     document.getElementById('start-scanner-btn').style.display = 'inline-block';
                     document.getElementById('stop-scanner-btn').style.display = 'none';
-                    if (status) {
+                    if (status && status.textContent.indexOf('✅') === -1) {
                         status.textContent = 'Camera stopped';
                         status.style.color = '#64748b';
                     }
@@ -106,11 +227,11 @@ frappe.ui.form.on('Gate Entry', {
 
                 d.show();
 
-                // Attach scanner button handlers via d.$wrapper — always safe after d.show()
+                // Attach scanner button handlers
                 d.$wrapper.find('#start-scanner-btn').on('click', startScanner);
                 d.$wrapper.find('#stop-scanner-btn').on('click', stopScanner);
 
-                // Clean up camera when dialog is dismissed by any means (Escape, click-outside, Close button)
+                // Clean up camera when dialog is dismissed
                 d.$wrapper.on('hidden.bs.modal', function() {
                     stopScanner();
                 });
@@ -128,7 +249,7 @@ frappe.ui.form.on('Gate Entry', {
                 },
                 callback: function(r) {
                     if (r.message) {
-                        let asn = r.message;
+                        var asn = r.message;
                         frm.set_value('supplier', asn.supplier);
                         frm.set_value('supplier_name', asn.supplier_name);
                         frm.set_value('vehicle_no', asn.vehicle_no);
@@ -146,7 +267,6 @@ frappe.ui.form.on('Gate Entry', {
     unloading_start_time: function(frm) {
         if (frm.doc.unloading_start_time) {
             frm.set_value('unloading_end_time', '');
-            // Set status to Unloading
             if (frm.doc.status === 'At Gate' || frm.doc.status === 'Waiting for Unloading') {
                 frm.set_value('status', 'Unloading');
             }
@@ -155,10 +275,7 @@ frappe.ui.form.on('Gate Entry', {
 
     unloading_end_time: function(frm) {
         if (frm.doc.unloading_end_time && frm.doc.unloading_start_time) {
-            // Calculate duration via server-side
-            frm.call('calculate_unloading_duration', {}, function(r) {
-                // Duration auto-calculated on validate
-            });
+            frm.call('calculate_unloading_duration', {}, function(r) {});
             frm.set_value('status', 'Completed');
         }
     }
