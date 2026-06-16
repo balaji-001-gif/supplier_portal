@@ -201,14 +201,13 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
                     batch = frappe.new_doc("Batch")
                     batch.batch_id = batch_no
                     batch.item = ge_item.get("item_code")
+                    batch.supplier = pr.supplier
                     batch.manufacturing_date = ge_item.get("manufacturing_date")
                     batch.expiry_date = ge_item.get("expiry_date")
                     batch.batch_qty = qty
+                    batch.reference_doctype = "Purchase Receipt"
                     batch.save(ignore_permissions=True)
                     pr_item.batch_no = batch.name
-                    frappe.msgprint(frappe._(
-                        "Batch {0} auto-created for item {1}."
-                    ).format(batch_no, ge_item.get("item_code")))
 
                 pr_item.manufacturing_date = ge_item.get("manufacturing_date")
                 pr_item.expiry_date = ge_item.get("expiry_date")
