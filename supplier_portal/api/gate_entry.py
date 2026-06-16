@@ -191,20 +191,19 @@ def create_purchase_receipt_from_gate_entry(gate_entry_name, items=None):
                 "purchase_order_item": po_detail
             })
 
-            # Use batch/serial from source (Gate Entry Items or ASN Items)
-            ge_has_items = bool(ge.get("items"))
-            batch_no = ge_item.get("batch_no") if ge_has_items else ge_item.batch_no
+            # Use batch/serial from source (both Gate Entry Items and ASN Items support .get())
+            batch_no = ge_item.get("batch_no")
             if batch_no:
                 if frappe.db.exists("Batch", batch_no):
                     pr_item.batch_no = batch_no
-                    pr_item.manufacturing_date = ge_item.get("manufacturing_date") if ge_has_items else ge_item.manufacturing_date
-                    pr_item.expiry_date = ge_item.get("expiry_date") if ge_has_items else ge_item.expiry_date
+                    pr_item.manufacturing_date = ge_item.get("manufacturing_date")
+                    pr_item.expiry_date = ge_item.get("expiry_date")
                 else:
                     frappe.msgprint(frappe._(
                         "Batch {0} for item {1} does not exist. Please create it first."
                     ).format(batch_no, ge_item.get("item_code")))
 
-            serial_nos = ge_item.get("serial_nos") if ge_has_items else ge_item.serial_nos
+            serial_nos = ge_item.get("serial_nos")
             if serial_nos:
                 pr_item.serial_no = serial_nos
 

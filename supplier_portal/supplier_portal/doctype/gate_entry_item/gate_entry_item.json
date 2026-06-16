@@ -44,8 +44,9 @@
   },
   {
    "fieldname": "po_detail",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "PO Detail",
+   "options": "Purchase Order Item",
    "read_only": 1
   },
   {
