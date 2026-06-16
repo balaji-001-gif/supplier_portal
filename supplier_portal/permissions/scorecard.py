@@ -21,7 +21,10 @@ def has_permission(doc, ptype, user):
         if ptype != 'read':
             return None
         user_supplier = frappe.db.get_value("User", user, "supplier")
-        if user_supplier and doc.supplier == user_supplier:
+        if not user_supplier:
+            # No linked supplier — internal user, fall back to defaults
+            return None
+        if doc.supplier == user_supplier:
             return True
         return False
     return None
