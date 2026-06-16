@@ -588,6 +588,9 @@
             <p><a href="/supplier_portal/asn" style="font-size: 13px;">← Back to ASNs</a></p>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+            {% if asn.docstatus == 0 %}
+            <button class="btn btn-primary" id="submitAsnBtn" style="font-size: 13px;">✅ Submit ASN</button>
+            {% endif %}
             {% if asn.docstatus == 1 and asn_packages and asn_packages|selectattr('qr_generated')|list|length > 0 %}
             <a href="/api/method/supplier_portal.api.qr_code.get_package_qr_pdf?asn_name={{ asn.name }}" class="btn btn-success" target="_blank" style="font-size: 13px;">🖨️ Print QR Codes</a>
             {% endif %}
@@ -692,6 +695,35 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
+
+    {% if asn.docstatus == 0 %}
+    <script>
+        document.getElementById('submitAsnBtn').addEventListener('click', function() {
+            var btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            frappe.call({
+                method: 'supplier_portal.api.asn.submit_asn',
+                args: { asn_name: '{{ asn.name }}' },
+                callback: function(r) {
+                    if (r.message && r.message.success) {
+                        frappe.msgprint(__('ASN submitted successfully! QR codes generated.'));
+                        window.location.reload();
+                    } else {
+                        frappe.msgprint(__('Error: ') + (r.message.message || 'Unknown error'));
+                        btn.disabled = false;
+                        btn.textContent = '✅ Submit ASN';
+                    }
+                },
+                error: function(err) {
+                    frappe.msgprint(__('Error: ') + err.message);
+                    btn.disabled = false;
+                    btn.textContent = '✅ Submit ASN';
+                }
+            });
+        });
+    </script>
     {% endif %}
 
     {% if asn.remarks %}
@@ -1028,9 +1060,10 @@
             var data = { subject: document.getElementById('q_subject').value, query_category: document.getElementById('q_category').value, priority: document.getElementById('q_priority').value, query_message: document.getElementById('q_message').value, reference_doctype: document.getElementById('q_ref_type').value || null, reference_docname: document.getElementById('q_ref_name').value || null };
             if (!data.subject || !data.query_category || !data.query_message) { frappe.msgprint(__('Please fill Subject, Category, and Message')); return; }
             this.disabled = true; this.textContent = 'Submitting...';
+            var docData = { doctype: 'Supplier Query', supplier: '{{ supplier }}', ...data };
             frappe.call({
                 method: 'frappe.client.insert',
-                args: { doc: { doctype: 'Supplier Query', ...data } },
+                args: { doc: docData },
                 callback: function(r) {
                     if (r.message) {
                         // Submit the document to trigger on_submit (sets status to Open)
