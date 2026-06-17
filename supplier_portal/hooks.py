@@ -133,10 +133,10 @@ def sync_portal_user(doc, method):
                 user_doc.add_roles("Supplier Portal User")
 
     # If portal_user was cleared, unset the old user's supplier field
-    if doc.flags.docstatus == 0 and not doc.portal_user:
-        old_user = frappe.db.get_value("Supplier", doc.name, "portal_user")
-        if old_user:
-            current = frappe.db.get_value("User", old_user, "supplier")
-            if current == doc.name:
-                frappe.db.set_value("User", old_user, "supplier", None)
+    doc_before_save = doc.get_doc_before_save()
+    if not doc.portal_user and doc_before_save and doc_before_save.portal_user:
+        old_user = doc_before_save.portal_user
+        current = frappe.db.get_value("User", old_user, "supplier")
+        if current == doc.name:
+            frappe.db.set_value("User", old_user, "supplier", None)
 
