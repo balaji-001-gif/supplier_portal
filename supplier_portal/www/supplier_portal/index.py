@@ -13,7 +13,18 @@ def get_context(context):
 
     user_supplier = frappe.db.get_value("User", frappe.session.user, "supplier")
     if not user_supplier:
-        frappe.throw(frappe._("You don't have supplier portal access"), frappe.PermissionError)
+        # Fallback: check if this user is linked as portal_user on any Supplier
+        portal_supplier = frappe.db.get_value(
+            "Supplier",
+            {"portal_user": frappe.session.user, "portal_access_enabled": 1},
+            "name"
+        )
+        if not portal_supplier:
+            frappe.throw(frappe._("You don't have supplier portal access"), frappe.PermissionError)
+        # Auto-link the user for future requests
+        frappe.db.set_value("User", frappe.session.user, "supplier", portal_supplier)
+        frappe.db.commit()
+        user_supplier = portal_supplier
 
     context.supplier = user_supplier
     context.supplier_doc = frappe.get_doc("Supplier", user_supplier)

@@ -41,6 +41,9 @@ override_doctype_class = {
 doc_events = {
     "Purchase Order": {
         "on_submit": "supplier_portal.api.supplier_portal.notify_supplier_on_po_submit"
+    },
+    "Supplier": {
+        "on_update": "supplier_portal.hooks.sync_portal_user"
     }
 }
 
@@ -108,4 +111,32 @@ website_context = {
     "footer": False,
     "supplier_portal": True
 }
+
+
+def sync_portal_user(doc, method):
+    """Auto-sync User.supplier when Supplier.portal_user or portal_access_enabled changes.
+
+    When a Supplier's portal_user is set, this ensures the linked User's
+    'supplier' custom field is also set (and unset if removed).
+    """
+    if not frappe.db.exists("Custom Field", {"dt": "User", "fieldname": "supplier"}):
+        return
+
+    if doc.portal_user:
+        prev_supplier = frappe.db.get_value("User", doc.portal_user, "supplier")
+        if prev_supplier != doc.name:
+            frappe.db.set_value("User", doc.portal_user, "supplier", doc.name)
+            # Ensure the user gets the Supplier Portal User role
+            user_doc = frappe.get_doc("User", doc.portal_user)
+            has_role = any(r.role == "Supplier Portal User" for r in user_doc.roles)
+            if not has_role:
+                user_doc.add_roles("Supplier Portal User")
+
+    # If portal_user was cleared, unset the old user's supplier field
+    if doc.flags.docstatus == 0 and not doc.portal_user:
+        old_user = frappe.db.get_value("Supplier", doc.name, "portal_user")
+        if old_user:
+            current = frappe.db.get_value("User", old_user, "supplier")
+            if current == doc.name:
+                frappe.db.set_value("User", old_user, "supplier", None)
 
