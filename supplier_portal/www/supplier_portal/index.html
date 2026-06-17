@@ -1001,7 +1001,7 @@
 
     <div class="page-header">
         <h1>Queries & Communication</h1>
-        <button class="btn btn-primary" onclick="document.getElementById('queryModal').classList.add('active')">+ Raise New Query</button>
+        <button class="btn btn-primary" id="raiseQueryBtn">+ Raise New Query</button>
     </div>
 
     <div class="filter-bar">
@@ -1091,52 +1091,50 @@
                 </div>
             </form>
             <div class="button-group">
-                <button class="btn btn-outline" onclick="document.getElementById('queryModal').classList.remove('active')">Cancel</button>
+                <button class="btn btn-outline" id="cancelQueryBtn">Cancel</button>
                 <button class="btn btn-primary" id="submitQueryBtn">Submit Query</button>
             </div>
         </div>
     </div>
 
     <script>
+        document.getElementById('raiseQueryBtn').addEventListener('click', function() {
+            document.getElementById('queryModal').classList.add('active');
+        });
+        document.getElementById('cancelQueryBtn').addEventListener('click', function() {
+            document.getElementById('queryModal').classList.remove('active');
+        });
         document.getElementById('submitQueryBtn').addEventListener('click', function() {
-            var data = { subject: document.getElementById('q_subject').value, query_category: document.getElementById('q_category').value, priority: document.getElementById('q_priority').value, query_message: document.getElementById('q_message').value, reference_doctype: document.getElementById('q_ref_type').value || null, reference_docname: document.getElementById('q_ref_name').value || null };
-            if (!data.subject || !data.query_category || !data.query_message) { frappe.msgprint(__('Please fill Subject, Category, and Message')); return; }
-            this.disabled = true; this.textContent = 'Submitting...';
-            var docData = { doctype: 'Supplier Query', supplier: '{{ supplier }}', ...data };
+            var data = {
+                subject: document.getElementById('q_subject').value,
+                query_category: document.getElementById('q_category').value,
+                priority: document.getElementById('q_priority').value,
+                query_message: document.getElementById('q_message').value,
+                reference_doctype: document.getElementById('q_ref_type').value || null,
+                reference_docname: document.getElementById('q_ref_name').value || null
+            };
+            if (!data.subject || !data.query_category || !data.query_message) {
+                frappe.msgprint(__('Please fill Subject, Category, and Message'));
+                return;
+            }
+            this.disabled = true;
+            this.textContent = 'Submitting...';
             frappe.call({
-                method: 'frappe.client.insert',
-                args: { doc: docData },
+                method: 'supplier_portal.supplier_portal.doctype.supplier_query.supplier_query.create_and_submit_query',
+                args: data,
                 callback: function(r) {
-                    if (r.message) {
-                        var docname = r.message.name || r.message;
-                        frappe.call({
-                            method: 'frappe.client.submit',
-                            args: { doctype: 'Supplier Query', docname: docname },
-                            callback: function(res) {
-                                if (res.message) {
-                                    frappe.msgprint(__('Query submitted successfully'));
-                                    document.getElementById('queryModal').classList.remove('active');
-                                    location.reload();
-                                } else {
-                                    frappe.msgprint(__('Error submitting query'));
-                                    document.getElementById('submitQueryBtn').disabled = false;
-                                    document.getElementById('submitQueryBtn').textContent = 'Submit Query';
-                                }
-                            },
-                            error: function(err) {
-                                frappe.msgprint(__('Error: ') + err.message);
-                                document.getElementById('submitQueryBtn').disabled = false;
-                                document.getElementById('submitQueryBtn').textContent = 'Submit Query';
-                            }
-                        });
+                    if (r.message && r.message.success) {
+                        frappe.msgprint(__('Query submitted successfully'));
+                        document.getElementById('queryModal').classList.remove('active');
+                        location.reload();
                     } else {
-                        frappe.msgprint(__('Error submitting query'));
+                        frappe.msgprint(__('Error: ') + (r.message || 'Unknown error'));
                         document.getElementById('submitQueryBtn').disabled = false;
                         document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                     }
                 },
                 error: function(err) {
-                    frappe.msgprint(__('Error: ') + err.message);
+                    frappe.msgprint(__('Error: ') + (err.message || 'Could not submit query'));
                     document.getElementById('submitQueryBtn').disabled = false;
                     document.getElementById('submitQueryBtn').textContent = 'Submit Query';
                 }

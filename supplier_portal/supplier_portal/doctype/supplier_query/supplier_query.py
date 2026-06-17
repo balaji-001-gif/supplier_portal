@@ -35,23 +35,36 @@ class SupplierQuery(Document):
 
     def notify_internal_team(self):
         """Notify purchase team about new query"""
-        purchase_users = frappe.get_all(
-            "User",
-            filters={"enabled": 1},
-            fields=["email"],
-            or_filters=[
-                {"role_profile_name": ["in", ["Purchase Manager", "Purchase User"]]}
-            ]
+        # Query users by role assignment (not role_profile_name)
+        purchase_user_emails = frappe.get_all(
+            "Has Role",
+            filters={
+                "role": ["in", ["Purchase Manager", "Purchase User"]],
+                "parenttype": "User"
+            },
+            pluck="parent"
         )
-        if purchase_users:
-            frappe.sendmail(
-                recipients=[u.email for u in purchase_users],
-                subject=frappe._("New Supplier Query: {0} - {1}").format(self.subject, self.supplier_name),
-                message=frappe._(
-                    "Query from {0}: {1}<br><br>Message: {2}"
-                ).format(self.supplier_name, self.subject, self.query_message),
-                now=True
+        if purchase_user_emails:
+            # Filter only enabled users
+            enabled_users = frappe.get_all(
+                "User",
+                filters={"name": ["in", purchase_user_emails], "enabled": 1},
+                pluck="email"
             )
+            enabled_users = [e for e in enabled_users if e]
+            if enabled_users:
+                try:
+                    frappe.sendmail(
+                        recipients=enabled_users,
+                        subject=frappe._("New Supplier Query: {0} - {1}").format(self.subject, self.supplier_name),
+                        message=frappe._(
+                            "Query from {0}: {1}<br><br>Message: {2}"
+                        ).format(self.supplier_name, self.subject, self.query_message),
+                        now=True
+                    )
+                except Exception:
+                    # Email failure should not block query submission
+                    pass
 
     def notify_supplier_of_response(self):
         """Notify supplier that their query has been responded"""
@@ -83,6 +96,30 @@ class SupplierQuery(Document):
         self.status = "Responded"
         self.save(ignore_permissions=True)
         return self.name
+
+
+@frappe.whitelist()
+def create_and_submit_query():
+    """Create and submit a new Supplier Query from the supplier portal"""
+    data = frappe.local.form_dict
+
+    user_supplier = frappe.db.get_value("User", frappe.session.user, "supplier")
+    if not user_supplier:
+        frappe.throw(frappe._("You don't have supplier portal access"), frappe.PermissionError)
+
+    doc = frappe.new_doc("Supplier Query")
+    doc.supplier = user_supplier
+    doc.subject = data.get("subject")
+    doc.query_category = data.get("query_category")
+    doc.priority = data.get("priority", "Medium")
+    doc.query_message = data.get("query_message")
+    doc.reference_doctype = data.get("reference_doctype") or None
+    doc.reference_docname = data.get("reference_docname") or None
+
+    doc.insert(ignore_permissions=True)
+    doc.submit()
+
+    return {"success": True, "name": doc.name}
 
 
 @frappe.whitelist()
